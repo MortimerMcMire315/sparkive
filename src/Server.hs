@@ -3,31 +3,54 @@
 module Server where
 
 import Control.Applicative ((<$>), optional)
+import Control.Monad (msum)
 import Data.Maybe (fromMaybe)
 import Data.Text (Text)
 import Data.Text.Lazy (unpack)
-import Happstack.Lite
+import Happstack.Server
 import Text.Blaze.Html.Renderer.Text (renderHtml)
-import Text.Hamlet
+import Text.Blaze.Html (toHtml)
+import Text.Hamlet (shamletFile, Html)
+import Text.Lucius (luciusFile, renderCss, Css)
+import TemplateUtil (hamFile, cssFile)
+
+import Data.List.Split (splitOn)
+import Data.List (intercalate)
 
 run :: IO ()
-run = serve Nothing starchive
+run = simpleHTTP nullConf starchive
+
+myPolicy :: BodyPolicy
+myPolicy = defaultBodyPolicy "/tmp/" 0 1000 1000
 
 starchive :: ServerPart Response
-starchive = msum
-    [  
-      homePage
-    ]
+starchive = do
+    decodeBody myPolicy
+    msum [ 
+           dir "css"     $ css
+         , homePage
+         ]
 
---template :: Text -> ServerPart Response
-template :: ToMessage a => a -> ServerPart Response
-template text = ok $ toResponse text
+css = path $ \(cssRequest :: String) -> 
+             case cssRequest of
+                "styles.css" -> ok $ (toResponse mainStyleSheet) {rsHeaders=(mkHeaders [("Content-Type", "text/css")])}
+                _            -> notFound $ toResponse ("CSS stylesheet not found." :: String)
 
---header :: ServerPart Response
-header = $(shamletFile "src/Template/header.hamlet")
+{--
+serveLuciusFile str
+    | head parts /= "css" = notFound "CSS resource could not be found."
+    | otherwise = ok . toResponse . getLuciusFile . reverse $ intercalate "." toLucius
+    where parts = reverse $ splitOn "." str
+          toLucius = "css" : tail parts
+          --}
 
---footer :: ServerPart Response
-footer = $(shamletFile "src/Template/footer.hamlet")
+mainStyleSheet = renderCss $ $(luciusFile (cssFile "styles")) undefined
+
+header :: Html
+header = $(shamletFile $ hamFile "header")
+
+footer :: Html
+footer = $(shamletFile $ hamFile "footer")
 
 homePage :: ServerPart Response
-homePage = template ( $(shamletFile "src/Template/home.hamlet") )
+homePage = ok $ toResponse ( $(shamletFile $ hamFile "home") )
