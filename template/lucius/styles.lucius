@@ -1,3 +1,24 @@
+* {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    outline: 0;
+    font-size: 100%;
+    vertical-align: baseline;
+    background: transparent;
+}
+
+#main-page-banner {
+    font-family: 'Poppins', sans-serif;
+    text-align: center;
+    color: #f2f2f2;
+    background-color: #330033;
+}
+
+#main-page-banner h1 {
+	font-size: 30px;
+}
+
 body {
-    color: red;
+    margin: 0px;
 }
