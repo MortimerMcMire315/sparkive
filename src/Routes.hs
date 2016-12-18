@@ -10,6 +10,8 @@ import qualified Template as T
 import ContentTypes (MIMEType(..))
 import qualified ContentTypes as CT
 
+import Control.Monad.IO.Class (liftIO)
+
 myPolicy :: BodyPolicy
 myPolicy = defaultBodyPolicy "/tmp/" 0 1000 1000
 
