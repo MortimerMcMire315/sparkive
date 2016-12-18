@@ -14,6 +14,4 @@ mainStyleSheet = renderCss $ $(luciusFile (cssFile "styles")) undefined
 mainPageBanner = $(shamletFile $ hamFile "mainPageBanner")
 header         = $(shamletFile $ hamFile "header")
 footer         = $(shamletFile $ hamFile "footer")
-
-homePage :: ServerPart Response
-homePage = ok $ toResponse ( $(shamletFile $ hamFile "home") )
+homePage       = $(shamletFile $ hamFile "home")

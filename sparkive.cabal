@@ -20,6 +20,7 @@ library
   other-modules:       Template
                      , Routes
                      , TemplateUtil
+                     , ContentTypes
 
   build-depends:       base >= 4.7 && < 5
                      , happstack-server >= 7 && < 8

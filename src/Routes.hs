@@ -1,11 +1,14 @@
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE FlexibleContexts #-} --Added to permit the inferred type of nullDirServe in the function serveCSS
 
 module Routes where
 
 import Happstack.Server
 import Control.Monad (msum)
 
-import Template
+import qualified Template as T
+import ContentTypes (MIMEType(..))
+import qualified ContentTypes as CT
 
 myPolicy :: BodyPolicy
 myPolicy = defaultBodyPolicy "/tmp/" 0 1000 1000
@@ -14,12 +17,16 @@ routes :: ServerPart Response
 routes = do
     decodeBody myPolicy
     msum [ 
-           dir "css"     $ css
-         , homePage
+           dir "css"      $ serveCSS
+         , nullDir >> (ok $ toResponse T.homePage)
          ]
 
-css = path $ \(cssRequest :: String) -> 
+{-- Serve a CSS file from a finite possibilities --}
+serveCSS :: ServerPart Response
+serveCSS = path $ \(cssRequest :: String) -> 
              case cssRequest of
-                "styles.css" -> ok $ (toResponse mainStyleSheet) 
-                                       {rsHeaders=(mkHeaders [("Content-Type", "text/css")])}
+                "styles.css" -> nullDirServe T.mainStyleSheet
                 _            -> notFound $ toResponse ("CSS stylesheet not found." :: String)
+                -- Make sure the request is sane (no path segments after *.css);
+                -- if so, serve the file with MIME type "text/css"
+                where nullDirServe template = nullDir >> (ok $ (CT.toResMime template CSS))
