@@ -14,4 +14,4 @@ mainStyleSheet = renderCss $ $(luciusFile (cssFile "styles")) undefined
 mainPageBanner = $(shamletFile $ hamFile "mainPageBanner")
 header         = $(shamletFile $ hamFile "header")
 footer         = $(shamletFile $ hamFile "footer")
-homePage       = $(shamletFile $ hamFile "home")
+homePage confResult = $(shamletFile $ hamFile "home")

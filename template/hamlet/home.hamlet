@@ -2,5 +2,7 @@
 <html>
     <body>
         ^{mainPageBanner}
-        <h1>Yo
+        $forall row <- confResult
+            $forall string <- row
+                <p>#{string}
         ^{footer}

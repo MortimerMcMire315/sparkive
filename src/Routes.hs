@@ -9,8 +9,8 @@ import Control.Monad (msum)
 import qualified Template as T
 import ContentTypes (MIMEType(..))
 import qualified ContentTypes as CT
-
-import Control.Monad.IO.Class (liftIO)
+import qualified DBConn as DB
+import Control.Monad.Trans.Class (lift)
 
 myPolicy :: BodyPolicy
 myPolicy = defaultBodyPolicy "/tmp/" 0 1000 1000
@@ -20,7 +20,7 @@ routes = do
     decodeBody myPolicy
     msum [ 
            dir "css"      $ serveCSS
-         , nullDir >> (ok $ toResponse T.homePage)
+         , nullDir       >> homePage
          ]
 
 {-- Serve a CSS file from a finite possibilities --}
@@ -32,3 +32,12 @@ serveCSS = path $ \(cssRequest :: String) ->
                 -- Make sure the request is sane (no path segments after *.css);
                 -- if so, serve the file with MIME type "text/css"
                 where nullDirServe template = nullDir >> (ok $ (CT.toResMime template CSS))
+
+homePage :: ServerPart Response
+homePage = do
+    conn <- lift DB.getConn
+    case conn of
+        Left e -> error e
+        Right c -> do
+            results <- lift $ DB.unsafeExampleQuery c
+            ok . toResponse $ T.homePage results
