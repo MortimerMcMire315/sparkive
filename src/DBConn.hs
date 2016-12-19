@@ -7,20 +7,13 @@ import Control.Monad.IO.Class (liftIO)
 import Control.Monad.Except (throwError, ExceptT, runExceptT)
 import qualified Config
 
---getConn = do
---    confData <- liftIO Config.parseConfig
---    case confData of
---         Left err -> throwError err
---         Right (Config.DBAuth h u p) -> liftIO $ dbConn h u p
-
---getConn :: IO (Either String Connection)
 getConn' :: ExceptT String IO Connection
 getConn' = do
     confData <- liftIO Config.parseConfig
     case confData of
         Left e -> throwError $ Config.prettyPrintErr e
-        Right (Config.DBAuth h u p) -> liftIO $ do
-            conn <- connect $ ConnectInfo "localhost" 5432 "sparkive" "sparkles" "sparkive"
+        Right (Config.DBAuth host user pass) -> liftIO $ do
+            conn <- connect $ ConnectInfo host 5432 user pass "sparkive"
             return conn
 
 getConn :: IO (Either String Connection)
