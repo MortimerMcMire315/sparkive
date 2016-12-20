@@ -16,7 +16,7 @@ import Database.PostgreSQL.Simple (query_)
 import qualified Template as T
 import qualified ContentTypes as CT
 import qualified DBConn as DB
-import qualified Exceptions as E
+import qualified Exception as E
 
 myPolicy :: BodyPolicy
 myPolicy = defaultBodyPolicy "/tmp/" 0 1000 1000
@@ -41,8 +41,16 @@ serveCSS = path $ \(cssRequest :: String) ->
 
 homePage :: ServerPart Response
 homePage = do
-    eitherConn <- liftIO $ catches (fmap Right DB.getConn) [E.handleConfigParseException, E.handleSqlConnectionException]
+    eitherConn <- liftIO $ catches (fmap Right DB.getConn) [ E.handleConfigParseException 
+                                                           , E.handleSQLConnectionException
+                                                           , E.handleInvalidPortException 
+                                                           ]
+    let respondWithErr s = ok . toResponse $ T.homePageT [[]] s
     case eitherConn of
-        Left err -> ok . toResponse $ T.homePageT [[]] err
-        Right conn -> do results <- liftIO $ DB.exampleQuery conn
-                         ok . toResponse $ T.homePageT results ""
+        Left err   -> respondWithErr err
+        Right conn -> do eitherResults <- liftIO $ catches 
+                                                      (fmap Right $ DB.exampleQuery conn) 
+                                                      [E.handleSQLError]
+                         case eitherResults of
+                            Left err      -> respondWithErr err
+                            Right results -> ok . toResponse $ T.homePageT results ""

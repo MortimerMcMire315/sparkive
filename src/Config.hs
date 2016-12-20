@@ -9,29 +9,31 @@ import Control.Monad.Except (runExceptT)
 import Control.Monad.Catch (throwM, MonadThrow)
 import Control.Monad (join)
 
-import qualified Exceptions as E
+import qualified Exception as E
 
 
-data DBAuth = DBAuth { host :: String
-                     , user :: String
-                     , pass :: String } deriving Show
+data DBAuth = DBAuth { host   :: String
+                     , user   :: String
+                     , pass   :: String 
+                     , port   :: String
+                     , dbname :: String} deriving Show
 
 parseConfig' :: IO (Either CPError DBAuth)
 parseConfig' = runExceptT $ do
     cp <- join $ liftIO $ readfile emptyCP "conf/sparkive.conf"
-    host <- get cp "Database" "host"
-    user <- get cp "Database" "user"
-    pass <- get cp "Database" "pass"
-    return $ DBAuth host user pass
+    host   <- get cp "Database" "host"
+    user   <- get cp "Database" "user"
+    pass   <- get cp "Database" "pass"
+    port   <- get cp "Database" "port"
+    dbname <- get cp "Database" "db_name"
+    return $ DBAuth host user pass port dbname
 
 parseConfig :: IO DBAuth
 parseConfig = do
     pc <- parseConfig'
     case pc of
         Left cperr -> throwM (E.ConfigParseException $ prettyPrintErr cperr)
-        Right x -> do
-            putStrLn $ show x
-            return x
+        Right x -> return x
 
 --More on this later. Bad user experience for now
 prettyPrintErr :: CPError -> String

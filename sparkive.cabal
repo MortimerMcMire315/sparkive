@@ -24,7 +24,8 @@ library
                      , ContentTypes
                      , Config
                      , DBConn
-                     , Exceptions
+                     , Exception
+                     , ExceptionTemplate
 
   build-depends:       base >= 4.7 && < 5
                      , exceptions >= 0.8 && < 0.9
