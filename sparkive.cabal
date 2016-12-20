@@ -24,8 +24,10 @@ library
                      , ContentTypes
                      , Config
                      , DBConn
+                     , Exceptions
 
   build-depends:       base >= 4.7 && < 5
+                     , exceptions >= 0.8 && < 0.9
                      , mtl >= 2.2 && < 2.3
                      , happstack-server >= 7 && < 8
                      , template-haskell >= 2.10 && < 3

@@ -1,11 +1,12 @@
-^{header}
+^{headerT}
 <html>
     <body>
-        ^{mainPageBanner}
+        ^{mainPageBannerT}
         $if null err
             $forall row <- confResult
+                <p>
                 $forall string <- row
-                    <p>#{string}
+                    #{string} -
         $else
-            <p>#{err}
-        ^{footer}
+            ^{errBox}
+        ^{footerT}

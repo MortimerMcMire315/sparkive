@@ -22,3 +22,26 @@
 body {
     margin: 0px;
 }
+
+.err-box {
+    background-color: #ff7a7a;
+    color: #380700;
+    text-align: center;
+    width: 50%;
+    margin: 0 auto;
+    padding: 20px;
+    border-style: solid;
+    border-width: 2px;
+    border-color: #380700;
+}
+
+.err-box-container {
+    width: 100%;
+    text-align: center;
+    padding-top: 50px;
+}
+
+.err-box-text {
+    text-align: left;
+}
+

@@ -3,25 +3,35 @@
 module Config where
 
 import Data.ConfigFile
-import Control.Monad.IO.Class (liftIO, MonadIO)
---import Control.Monad.Error.Class (MonadError)
-import Control.Monad.Except (runExceptT, MonadError, withExceptT, ExceptT)
+import Control.Monad.IO.Class (liftIO)
+--import Control.Monad.Throw (runExceptT, MonadError, withExceptT, ExceptT)
+import Control.Monad.Except (runExceptT)
+import Control.Monad.Catch (throwM, MonadThrow)
 import Control.Monad (join)
+
+import qualified Exceptions as E
+
 
 data DBAuth = DBAuth { host :: String
                      , user :: String
-                     , pass :: String }
+                     , pass :: String } deriving Show
 
-parseConfig' :: ExceptT CPError IO DBAuth
-parseConfig' = do
+parseConfig' :: IO (Either CPError DBAuth)
+parseConfig' = runExceptT $ do
     cp <- join $ liftIO $ readfile emptyCP "conf/sparkive.conf"
     host <- get cp "Database" "host"
     user <- get cp "Database" "user"
     pass <- get cp "Database" "pass"
     return $ DBAuth host user pass
 
-parseConfig :: ExceptT String IO DBAuth
-parseConfig = withExceptT prettyPrintErr parseConfig'
+parseConfig :: IO DBAuth
+parseConfig = do
+    pc <- parseConfig'
+    case pc of
+        Left cperr -> throwM (E.ConfigParseException $ prettyPrintErr cperr)
+        Right x -> do
+            putStrLn $ show x
+            return x
 
 --More on this later. Bad user experience for now
 prettyPrintErr :: CPError -> String

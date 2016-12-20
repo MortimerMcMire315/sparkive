@@ -1,5 +1,6 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE FlexibleContexts #-} --Added to permit the inferred type of nullDirServe in the function serveCSS
+{-# LANGUAGE OverloadedStrings #-}
 
 module Routes where
 
@@ -9,10 +10,13 @@ import Control.Monad (msum)
 import ContentTypes (MIMEType(..))
 import Control.Monad.Trans.Class (lift)
 import Control.Monad.IO.Class (liftIO)
+import Control.Monad.Catch (catch, handle, catches)
+import Database.PostgreSQL.Simple (query_)
 
 import qualified Template as T
 import qualified ContentTypes as CT
 import qualified DBConn as DB
+import qualified Exceptions as E
 
 myPolicy :: BodyPolicy
 myPolicy = defaultBodyPolicy "/tmp/" 0 1000 1000
@@ -37,10 +41,8 @@ serveCSS = path $ \(cssRequest :: String) ->
 
 homePage :: ServerPart Response
 homePage = do
-    conn <- lift DB.getConn
-    case conn of
-        Left (e :: String) -> do
-            ok . toResponse $ T.homePage [] e
-        Right c -> do
-            results <- lift $ DB.unsafeExampleQuery c
-            ok . toResponse $ T.homePage results ""
+    eitherConn <- liftIO $ catches (fmap Right DB.getConn) [E.handleConfigParseException, E.handleSqlConnectionException]
+    case eitherConn of
+        Left err -> ok . toResponse $ T.homePageT [[]] err
+        Right conn -> do results <- liftIO $ DB.exampleQuery conn
+                         ok . toResponse $ T.homePageT results ""

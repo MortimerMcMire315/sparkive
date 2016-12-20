@@ -1,4 +1,4 @@
 $doctype 5
 <div #main-page-banner>
     <h1 #title>SPARKIVE
-    <p>Simple, elegant digital library
+    <p>A simple, elegant digital library

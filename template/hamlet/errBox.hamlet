@@ -1,0 +1,4 @@
+<div .err-box-container>
+    <div .err-box>
+        <div .err-box-text>
+            <p>^{errStr}
