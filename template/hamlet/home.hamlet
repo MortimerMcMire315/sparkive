@@ -2,7 +2,10 @@
 <html>
     <body>
         ^{mainPageBanner}
-        $forall row <- confResult
-            $forall string <- row
-                <p>#{string}
+        $if null err
+            $forall row <- confResult
+                $forall string <- row
+                    <p>#{string}
+        $else
+            <p>#{err}
         ^{footer}

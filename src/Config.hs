@@ -5,14 +5,14 @@ module Config where
 import Data.ConfigFile
 import Control.Monad.IO.Class (liftIO, MonadIO)
 --import Control.Monad.Error.Class (MonadError)
-import Control.Monad.Except (runExceptT, MonadError, catchError)
+import Control.Monad.Except (runExceptT, MonadError, withExceptT, ExceptT)
 import Control.Monad (join)
 
 data DBAuth = DBAuth { host :: String
                      , user :: String
                      , pass :: String }
 
-parseConfig' :: (MonadIO m, MonadError CPError m) => m DBAuth
+parseConfig' :: ExceptT CPError IO DBAuth
 parseConfig' = do
     cp <- join $ liftIO $ readfile emptyCP "conf/sparkive.conf"
     host <- get cp "Database" "host"
@@ -20,11 +20,8 @@ parseConfig' = do
     pass <- get cp "Database" "pass"
     return $ DBAuth host user pass
 
-parseConfig :: IO (Either CPError DBAuth)
-parseConfig = do
-    r <- runExceptT parseConfig'
-    return r
-
+parseConfig :: ExceptT String IO DBAuth
+parseConfig = withExceptT prettyPrintErr parseConfig'
 
 --More on this later. Bad user experience for now
 prettyPrintErr :: CPError -> String

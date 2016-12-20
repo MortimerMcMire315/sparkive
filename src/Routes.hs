@@ -6,11 +6,13 @@ module Routes where
 import Happstack.Server
 import Control.Monad (msum)
 
-import qualified Template as T
 import ContentTypes (MIMEType(..))
+import Control.Monad.Trans.Class (lift)
+import Control.Monad.IO.Class (liftIO)
+
+import qualified Template as T
 import qualified ContentTypes as CT
 import qualified DBConn as DB
-import Control.Monad.Trans.Class (lift)
 
 myPolicy :: BodyPolicy
 myPolicy = defaultBodyPolicy "/tmp/" 0 1000 1000
@@ -37,7 +39,8 @@ homePage :: ServerPart Response
 homePage = do
     conn <- lift DB.getConn
     case conn of
-        Left e -> error e
+        Left (e :: String) -> do
+            ok . toResponse $ T.homePage [] e
         Right c -> do
             results <- lift $ DB.unsafeExampleQuery c
-            ok . toResponse $ T.homePage results
+            ok . toResponse $ T.homePage results ""

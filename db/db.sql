@@ -35,7 +35,7 @@ SET default_tablespace = '';
 SET default_with_oids = false;
 
 --
--- Name: attr_values; Type: TABLE; Schema: public; Owner: sparkive
+-- Name: attr_values; Type: TABLE; Schema: public; Owner: %user%
 --
 
 CREATE TABLE attr_values (
@@ -45,10 +45,10 @@ CREATE TABLE attr_values (
 );
 
 
-ALTER TABLE attr_values OWNER TO sparkive;
+ALTER TABLE attr_values OWNER TO %user%;
 
 --
--- Name: attr_values_id_seq; Type: SEQUENCE; Schema: public; Owner: sparkive
+-- Name: attr_values_id_seq; Type: SEQUENCE; Schema: public; Owner: %user%
 --
 
 CREATE SEQUENCE attr_values_id_seq
@@ -59,17 +59,17 @@ CREATE SEQUENCE attr_values_id_seq
     CACHE 1;
 
 
-ALTER TABLE attr_values_id_seq OWNER TO sparkive;
+ALTER TABLE attr_values_id_seq OWNER TO %user%;
 
 --
--- Name: attr_values_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: sparkive
+-- Name: attr_values_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: %user%
 --
 
 ALTER SEQUENCE attr_values_id_seq OWNED BY attr_values.id;
 
 
 --
--- Name: attribute; Type: TABLE; Schema: public; Owner: sparkive
+-- Name: attribute; Type: TABLE; Schema: public; Owner: %user%
 --
 
 CREATE TABLE attribute (
@@ -78,10 +78,10 @@ CREATE TABLE attribute (
 );
 
 
-ALTER TABLE attribute OWNER TO sparkive;
+ALTER TABLE attribute OWNER TO %user%;
 
 --
--- Name: attribute_id_seq; Type: SEQUENCE; Schema: public; Owner: sparkive
+-- Name: attribute_id_seq; Type: SEQUENCE; Schema: public; Owner: %user%
 --
 
 CREATE SEQUENCE attribute_id_seq
@@ -92,17 +92,17 @@ CREATE SEQUENCE attribute_id_seq
     CACHE 1;
 
 
-ALTER TABLE attribute_id_seq OWNER TO sparkive;
+ALTER TABLE attribute_id_seq OWNER TO %user%;
 
 --
--- Name: attribute_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: sparkive
+-- Name: attribute_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: %user%
 --
 
 ALTER SEQUENCE attribute_id_seq OWNED BY attribute.id;
 
 
 --
--- Name: item; Type: TABLE; Schema: public; Owner: sparkive
+-- Name: item; Type: TABLE; Schema: public; Owner: %user%
 --
 
 CREATE TABLE item (
@@ -112,10 +112,10 @@ CREATE TABLE item (
 );
 
 
-ALTER TABLE item OWNER TO sparkive;
+ALTER TABLE item OWNER TO %user%;
 
 --
--- Name: item_attrs; Type: TABLE; Schema: public; Owner: sparkive
+-- Name: item_attrs; Type: TABLE; Schema: public; Owner: %user%
 --
 
 CREATE TABLE item_attrs (
@@ -125,10 +125,10 @@ CREATE TABLE item_attrs (
 );
 
 
-ALTER TABLE item_attrs OWNER TO sparkive;
+ALTER TABLE item_attrs OWNER TO %user%;
 
 --
--- Name: item_attrs_id_seq; Type: SEQUENCE; Schema: public; Owner: sparkive
+-- Name: item_attrs_id_seq; Type: SEQUENCE; Schema: public; Owner: %user%
 --
 
 CREATE SEQUENCE item_attrs_id_seq
@@ -139,17 +139,17 @@ CREATE SEQUENCE item_attrs_id_seq
     CACHE 1;
 
 
-ALTER TABLE item_attrs_id_seq OWNER TO sparkive;
+ALTER TABLE item_attrs_id_seq OWNER TO %user%;
 
 --
--- Name: item_attrs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: sparkive
+-- Name: item_attrs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: %user%
 --
 
 ALTER SEQUENCE item_attrs_id_seq OWNED BY item_attrs.id;
 
 
 --
--- Name: item_id_seq; Type: SEQUENCE; Schema: public; Owner: sparkive
+-- Name: item_id_seq; Type: SEQUENCE; Schema: public; Owner: %user%
 --
 
 CREATE SEQUENCE item_id_seq
@@ -160,45 +160,45 @@ CREATE SEQUENCE item_id_seq
     CACHE 1;
 
 
-ALTER TABLE item_id_seq OWNER TO sparkive;
+ALTER TABLE item_id_seq OWNER TO %user%;
 
 --
--- Name: item_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: sparkive
+-- Name: item_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: %user%
 --
 
 ALTER SEQUENCE item_id_seq OWNED BY item.id;
 
 
 --
--- Name: attr_values id; Type: DEFAULT; Schema: public; Owner: sparkive
+-- Name: attr_values id; Type: DEFAULT; Schema: public; Owner: %user%
 --
 
 ALTER TABLE ONLY attr_values ALTER COLUMN id SET DEFAULT nextval('attr_values_id_seq'::regclass);
 
 
 --
--- Name: attribute id; Type: DEFAULT; Schema: public; Owner: sparkive
+-- Name: attribute id; Type: DEFAULT; Schema: public; Owner: %user%
 --
 
 ALTER TABLE ONLY attribute ALTER COLUMN id SET DEFAULT nextval('attribute_id_seq'::regclass);
 
 
 --
--- Name: item id; Type: DEFAULT; Schema: public; Owner: sparkive
+-- Name: item id; Type: DEFAULT; Schema: public; Owner: %user%
 --
 
 ALTER TABLE ONLY item ALTER COLUMN id SET DEFAULT nextval('item_id_seq'::regclass);
 
 
 --
--- Name: item_attrs id; Type: DEFAULT; Schema: public; Owner: sparkive
+-- Name: item_attrs id; Type: DEFAULT; Schema: public; Owner: %user%
 --
 
 ALTER TABLE ONLY item_attrs ALTER COLUMN id SET DEFAULT nextval('item_attrs_id_seq'::regclass);
 
 
 --
--- Data for Name: attr_values; Type: TABLE DATA; Schema: public; Owner: sparkive
+-- Data for Name: attr_values; Type: TABLE DATA; Schema: public; Owner: %user%
 --
 
 COPY attr_values (id, attr_id, attr_value) FROM stdin;
@@ -211,14 +211,14 @@ COPY attr_values (id, attr_id, attr_value) FROM stdin;
 
 
 --
--- Name: attr_values_id_seq; Type: SEQUENCE SET; Schema: public; Owner: sparkive
+-- Name: attr_values_id_seq; Type: SEQUENCE SET; Schema: public; Owner: %user%
 --
 
 SELECT pg_catalog.setval('attr_values_id_seq', 5, true);
 
 
 --
--- Data for Name: attribute; Type: TABLE DATA; Schema: public; Owner: sparkive
+-- Data for Name: attribute; Type: TABLE DATA; Schema: public; Owner: %user%
 --
 
 COPY attribute (id, attr_name) FROM stdin;
@@ -228,14 +228,14 @@ COPY attribute (id, attr_name) FROM stdin;
 
 
 --
--- Name: attribute_id_seq; Type: SEQUENCE SET; Schema: public; Owner: sparkive
+-- Name: attribute_id_seq; Type: SEQUENCE SET; Schema: public; Owner: %user%
 --
 
 SELECT pg_catalog.setval('attribute_id_seq', 2, true);
 
 
 --
--- Data for Name: item; Type: TABLE DATA; Schema: public; Owner: sparkive
+-- Data for Name: item; Type: TABLE DATA; Schema: public; Owner: %user%
 --
 
 COPY item (id, title, data) FROM stdin;
@@ -247,7 +247,7 @@ COPY item (id, title, data) FROM stdin;
 
 
 --
--- Data for Name: item_attrs; Type: TABLE DATA; Schema: public; Owner: sparkive
+-- Data for Name: item_attrs; Type: TABLE DATA; Schema: public; Owner: %user%
 --
 
 COPY item_attrs (id, item_id, attr_value_id) FROM stdin;
@@ -263,21 +263,21 @@ COPY item_attrs (id, item_id, attr_value_id) FROM stdin;
 
 
 --
--- Name: item_attrs_id_seq; Type: SEQUENCE SET; Schema: public; Owner: sparkive
+-- Name: item_attrs_id_seq; Type: SEQUENCE SET; Schema: public; Owner: %user%
 --
 
 SELECT pg_catalog.setval('item_attrs_id_seq', 8, true);
 
 
 --
--- Name: item_id_seq; Type: SEQUENCE SET; Schema: public; Owner: sparkive
+-- Name: item_id_seq; Type: SEQUENCE SET; Schema: public; Owner: %user%
 --
 
 SELECT pg_catalog.setval('item_id_seq', 4, true);
 
 
 --
--- Name: attr_values attr_values_pk; Type: CONSTRAINT; Schema: public; Owner: sparkive
+-- Name: attr_values attr_values_pk; Type: CONSTRAINT; Schema: public; Owner: %user%
 --
 
 ALTER TABLE ONLY attr_values
@@ -285,7 +285,7 @@ ALTER TABLE ONLY attr_values
 
 
 --
--- Name: attribute attribute_pk; Type: CONSTRAINT; Schema: public; Owner: sparkive
+-- Name: attribute attribute_pk; Type: CONSTRAINT; Schema: public; Owner: %user%
 --
 
 ALTER TABLE ONLY attribute
@@ -293,7 +293,7 @@ ALTER TABLE ONLY attribute
 
 
 --
--- Name: item_attrs item_attrs_pk; Type: CONSTRAINT; Schema: public; Owner: sparkive
+-- Name: item_attrs item_attrs_pk; Type: CONSTRAINT; Schema: public; Owner: %user%
 --
 
 ALTER TABLE ONLY item_attrs
@@ -301,7 +301,7 @@ ALTER TABLE ONLY item_attrs
 
 
 --
--- Name: item item_pk; Type: CONSTRAINT; Schema: public; Owner: sparkive
+-- Name: item item_pk; Type: CONSTRAINT; Schema: public; Owner: %user%
 --
 
 ALTER TABLE ONLY item
@@ -309,7 +309,7 @@ ALTER TABLE ONLY item
 
 
 --
--- Name: attr_values attr_values_fk0; Type: FK CONSTRAINT; Schema: public; Owner: sparkive
+-- Name: attr_values attr_values_fk0; Type: FK CONSTRAINT; Schema: public; Owner: %user%
 --
 
 ALTER TABLE ONLY attr_values
@@ -317,7 +317,7 @@ ALTER TABLE ONLY attr_values
 
 
 --
--- Name: item_attrs item_attrs_fk0; Type: FK CONSTRAINT; Schema: public; Owner: sparkive
+-- Name: item_attrs item_attrs_fk0; Type: FK CONSTRAINT; Schema: public; Owner: %user%
 --
 
 ALTER TABLE ONLY item_attrs
@@ -325,7 +325,7 @@ ALTER TABLE ONLY item_attrs
 
 
 --
--- Name: item_attrs item_attrs_fk1; Type: FK CONSTRAINT; Schema: public; Owner: sparkive
+-- Name: item_attrs item_attrs_fk1; Type: FK CONSTRAINT; Schema: public; Owner: %user%
 --
 
 ALTER TABLE ONLY item_attrs
