@@ -1,0 +1,4 @@
+$forall row <- results
+    <p>
+    $forall string <- row
+        #{string} -

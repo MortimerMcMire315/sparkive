@@ -21,11 +21,13 @@ library
   other-modules:       View.Template
                      , View.TemplateUtil
                      , View.ContentTypes
+                     , View.Views
                      , Exception.Handler
                      , Exception.TH
+                     , DB.Conn
+                     , DB.Query
                      , Routes
                      , Config
-                     , DBConn
 
   build-depends:       base >= 4.7 && < 5
                      , exceptions >= 0.8 && < 0.9

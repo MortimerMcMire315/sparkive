@@ -20,6 +20,9 @@ errBoxT :: String -> Html
 errBoxT err = let errStr = preEscapedToHtml err in
                              $(shamletFile $ hamFile "errBox")
 
-homePageT :: [[String]] -> String -> Html
-homePageT confResult err = let errBox = errBoxT err in
-                                 $(shamletFile $ hamFile "home")
+genericResultT :: [[String]] -> Html
+genericResultT results = $(shamletFile $ hamFile "genericResult")
+
+
+homePageT :: Html -> Html
+homePageT toDisplay = $(shamletFile $ hamFile "home")

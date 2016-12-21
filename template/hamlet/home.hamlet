@@ -2,11 +2,5 @@
 <html>
     <body>
         ^{mainPageBannerT}
-        $if null err
-            $forall row <- confResult
-                <p>
-                $forall string <- row
-                    #{string} -
-        $else
-            ^{errBox}
+            ^{toDisplay}
         ^{footerT}
