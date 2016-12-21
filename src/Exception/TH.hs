@@ -1,6 +1,9 @@
-module ExceptionTemplate where
+{-# LANGUAGE QuasiQuotes #-}
+
+module Exception.TH where
 
 import Language.Haskell.TH.Syntax
+import Language.Haskell.TH.Quote (quoteDec)
 import Data.Maybe (fromJust)
 import Data.Typeable.Internal (Typeable)
 import Control.Exception (Exception)
@@ -64,12 +67,11 @@ handlerFSig handlerName = do
     monadTypeVar <- newName "m"
     anyTypeVar   <- newName "a"
 
-    return $ SigD handlerName $ 
-        ForallT [PlainTV monadTypeVar, PlainTV anyTypeVar]
-            --Class constraints (m must be an instance of MonadCatch and MonadThrow)
-            ([AppT (ConT monadCatch) (VarT monadTypeVar), AppT (ConT monadThrow) (VarT monadTypeVar)]) $ --Class constraints
-            -- Handler m (Either String a)
-            AppT (AppT (ConT handlerT) (VarT monadTypeVar)) $ AppT (AppT (ConT eitherN) $ ConT string) $ VarT anyTypeVar
+    return $ SigD handlerName $ ForallT [PlainTV monadTypeVar, PlainTV anyTypeVar]
+                --Class constraints (m must be an instance of MonadCatch and MonadThrow)
+                ([AppT (ConT monadCatch) (VarT monadTypeVar), AppT (ConT monadThrow) (VarT monadTypeVar)]) $ --Class constraints
+                -- Handler m (Either String a)
+                AppT (AppT (ConT handlerT) (VarT monadTypeVar)) $ AppT (AppT (ConT eitherN) $ ConT string) $ VarT anyTypeVar
 
 instanceDec :: Name -> Q Dec
 instanceDec typeName = do

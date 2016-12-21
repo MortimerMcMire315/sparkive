@@ -1,14 +1,14 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE RankNTypes #-}
 
-module Exception where
+module Exception.Handler where
 
 import Data.Typeable.Internal (Typeable)
 import Control.Exception (Exception)
 import Control.Monad.Catch (Handler (..), MonadCatch, MonadThrow)
 import Database.PostgreSQL.Simple (SqlError(..))
 
-import ExceptionTemplate
+import Exception.TH
 
 
 htmlNewlines :: String -> String

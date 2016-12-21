@@ -8,7 +8,7 @@ import Control.Monad.Catch (handleIOError, throwM)
 import GHC.Word (Word16)
 import Text.Read (readMaybe)
 
-import qualified Exception as E
+import qualified Exception.Handler as E
 import qualified Config
 
 getConn :: IO Connection

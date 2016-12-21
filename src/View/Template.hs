@@ -1,12 +1,12 @@
 {-# LANGUAGE TemplateHaskell #-}
-module Template where
+module View.Template where
 
 import Happstack.Server
 import Text.Hamlet (shamletFile, Html)
 import Text.Lucius (luciusFile, renderCss, Css)
 import Text.Blaze.Html (preEscapedToHtml)
 
-import TemplateUtil (hamFile, cssFile)
+import View.TemplateUtil (hamFile, cssFile)
 
 {-- LUCIUS PAGES --}
 mainStyleSheet = renderCss $ $(luciusFile (cssFile "styles")) undefined

@@ -9,7 +9,7 @@ import Control.Monad.Except (runExceptT)
 import Control.Monad.Catch (throwM, MonadThrow)
 import Control.Monad (join)
 
-import qualified Exception as E
+import qualified Exception.Handler as E
 
 
 data DBAuth = DBAuth { host   :: String

@@ -7,16 +7,13 @@ module Routes where
 import Happstack.Server
 import Control.Monad (msum)
 
-import ContentTypes (MIMEType(..))
-import Control.Monad.Trans.Class (lift)
 import Control.Monad.IO.Class (liftIO)
-import Control.Monad.Catch (catch, handle, catches)
-import Database.PostgreSQL.Simple (query_)
+import Control.Monad.Catch (catches)
 
-import qualified Template as T
-import qualified ContentTypes as CT
+import qualified View.Template as T
+import qualified View.ContentTypes as CT
 import qualified DBConn as DB
-import qualified Exception as E
+import qualified Exception.Handler as E
 
 myPolicy :: BodyPolicy
 myPolicy = defaultBodyPolicy "/tmp/" 0 1000 1000
@@ -37,7 +34,7 @@ serveCSS = path $ \(cssRequest :: String) ->
                 _            -> notFound $ toResponse ("CSS stylesheet not found." :: String)
                 -- Make sure the request is sane (no path segments after *.css);
                 -- if so, serve the file with MIME type "text/css"
-                where nullDirServe template = nullDir >> (ok $ (CT.toResMime template CSS))
+                where nullDirServe template = nullDir >> (ok $ (CT.toResMime template CT.CSS))
 
 homePage :: ServerPart Response
 homePage = do

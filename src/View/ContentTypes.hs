@@ -1,4 +1,4 @@
-module ContentTypes where
+module View.ContentTypes where
 import Happstack.Server
 
 --Really could just use strings, but doing it this way gives compile-time safety.

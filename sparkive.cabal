@@ -18,14 +18,14 @@ library
   hs-source-dirs:      src
   exposed-modules:     Server
 
-  other-modules:       Template
+  other-modules:       View.Template
+                     , View.TemplateUtil
+                     , View.ContentTypes
+                     , Exception.Handler
+                     , Exception.TH
                      , Routes
-                     , TemplateUtil
-                     , ContentTypes
                      , Config
                      , DBConn
-                     , Exception
-                     , ExceptionTemplate
 
   build-depends:       base >= 4.7 && < 5
                      , exceptions >= 0.8 && < 0.9
