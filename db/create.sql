@@ -201,13 +201,11 @@ ALTER TABLE ONLY item_attrs ALTER COLUMN id SET DEFAULT nextval('item_attrs_id_s
 -- Data for Name: attr_values; Type: TABLE DATA; Schema: public; Owner: %user%
 --
 
-COPY attr_values (id, attr_id, attr_value) FROM stdin;
-1	1	Leo Tolstoy
-2	1	David Foster Wallace
-3	1	Octavia Butler
-4	2	Science Fiction
-5	2	Historical Fiction
-\.
+INSERT INTO attr_values VALUES (1, 1, 'Leo Tolstoy');
+INSERT INTO attr_values VALUES (2, 1, 'David Foster Wallace');
+INSERT INTO attr_values VALUES (3, 1, 'Octavia Butler');
+INSERT INTO attr_values VALUES (4, 2, 'Science Fiction');
+INSERT INTO attr_values VALUES (5, 2, 'Historical Fiction');
 
 
 --
@@ -221,10 +219,8 @@ SELECT pg_catalog.setval('attr_values_id_seq', 5, true);
 -- Data for Name: attribute; Type: TABLE DATA; Schema: public; Owner: %user%
 --
 
-COPY attribute (id, attr_name) FROM stdin;
-1	Author
-2	Genre
-\.
+INSERT INTO attribute VALUES (1, 'Author');
+INSERT INTO attribute VALUES (2, 'Genre');
 
 
 --
@@ -238,28 +234,24 @@ SELECT pg_catalog.setval('attribute_id_seq', 2, true);
 -- Data for Name: item; Type: TABLE DATA; Schema: public; Owner: %user%
 --
 
-COPY item (id, title, data) FROM stdin;
-1	Parable of the Sower	texttexttext
-2	Parable of the Talents	texttexttext
-3	War and Peace	texttexttext
-4	Infinite Jest	texttexttext
-\.
+INSERT INTO item VALUES (1, 'Parable of the Sower', 'texttexttext');
+INSERT INTO item VALUES (2, 'Parable of the Talents', 'texttexttext');
+INSERT INTO item VALUES (3, 'War and Peace', 'texttexttext');
+INSERT INTO item VALUES (4, 'Infinite Jest', 'texttexttext');
 
 
 --
 -- Data for Name: item_attrs; Type: TABLE DATA; Schema: public; Owner: %user%
 --
 
-COPY item_attrs (id, item_id, attr_value_id) FROM stdin;
-1	1	3
-2	1	4
-3	2	3
-4	2	4
-5	3	1
-6	3	5
-7	4	2
-8	4	5
-\.
+INSERT INTO item_attrs VALUES (1, 1, 3);
+INSERT INTO item_attrs VALUES (2, 1, 4);
+INSERT INTO item_attrs VALUES (3, 2, 3);
+INSERT INTO item_attrs VALUES (4, 2, 4);
+INSERT INTO item_attrs VALUES (5, 3, 1);
+INSERT INTO item_attrs VALUES (6, 3, 5);
+INSERT INTO item_attrs VALUES (7, 4, 2);
+INSERT INTO item_attrs VALUES (8, 4, 5);
 
 
 --

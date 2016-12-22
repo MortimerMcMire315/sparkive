@@ -2,7 +2,7 @@
 {-# LANGUAGE FlexibleContexts #-} --Added to permit the inferred type of nullDirServe in the function serveCSS
 {-# LANGUAGE OverloadedStrings #-}
 
-module View.Views where
+module View.Views (homePage, serveCSS) where
 
 import Happstack.Server (ok, toResponse, ServerPart, Response, path, notFound, nullDir)
 
@@ -12,6 +12,7 @@ import Control.Monad.IO.Class (liftIO)
 import Text.Hamlet (Html)
 
 import qualified DB.Conn as DB
+import qualified DB.Query as Query
 import qualified Exception.Handler as E
 import qualified View.Template as Template
 import qualified View.ContentTypes as CT
@@ -38,29 +39,34 @@ tryQuery conn queryF successAction = do
         Right results   -> successAction results
 
 
--- | Attempt to open a DB connection. If it succeeds, run the given IO action,
---   which returns HTML to display on success. If the connection fails, return 
---   the HTML for an error box containing a string to display to the user.
-withConn :: (Connection -> IO Html) -> IO Html
-withConn successAction = do
+withConn :: (String -> IO Html) -> (Connection -> IO Html) -> IO Html
+withConn failAction successAction = do
     eitherErrConn <- catches 
                         (fmap Right DB.getConn) 
                            [ 
-                              E.handleConfigParseException 
-                              , E.handleSQLConnectionException
-                              , E.handleInvalidPortException 
+                             E.handleConfigParseException 
+                           , E.handleSQLConnectionException
+                           , E.handleInvalidPortException 
                            ]
     case eitherErrConn of
-        Left err   -> return $ Template.errBoxT err
+        Left err   -> failAction err
         Right conn -> successAction conn
+
+-- | Attempt to open a DB connection. If it succeeds, run the given IO action,
+--   which returns HTML to display on success. If the connection fails, return 
+--   the HTML for an error box containing a string to display to the user.
+withConnErrBox :: (Connection -> IO Html) -> IO Html
+withConnErrBox = withConn (\err -> return $ Template.errBoxT err)
 
 {-- The homepage is really just a sandbox for now. --}
 homePage :: ServerPart Response
 homePage = do
-    toInsert <- liftIO $ withConn 
-        (\conn -> 
-             tryQuery conn DB.exampleQuery (\results ->
-                   return $ Template.genericResultT results
-                                           )
+    toInsert <- liftIO $ withConnErrBox 
+        (\conn -> do
+            --Query.createDB conn "sparkive"
+            --return $ Template.errBoxT "Not really an error."
+            tryQuery conn DB.exampleQuery (\results ->
+                  return $ Template.genericResultT results
+                                          )
         )
     ok . toResponse $ Template.homePageT toInsert

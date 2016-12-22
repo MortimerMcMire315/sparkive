@@ -38,7 +38,7 @@ getConn = do
         Just p -> tryConn dbAuth p
 
 exampleQuery :: Connection -> IO [[String]]
-exampleQuery conn = liftIO $ query_ conn "SiELECT attribute.attr_name,attr_values.attr_value \
+exampleQuery conn = liftIO $ query_ conn "SELECT attribute.attr_name,attr_values.attr_value \
                                                 \FROM item_attrs, attr_values, attribute \
                                                 \WHERE item_attrs.item_id=1 \
                                                     \AND item_attrs.attr_value_id=attr_values.id \
