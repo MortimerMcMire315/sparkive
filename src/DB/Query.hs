@@ -1,6 +1,9 @@
 {-# LANGUAGE OverloadedStrings, ScopedTypeVariables #-}
 
-module DB.Query (createDB, checkDBExists) where
+module DB.Query 
+    ( createDB
+    , checkDBExists
+    ) where
 
 import Control.Monad.IO.Class (liftIO)
 import Database.PostgreSQL.Simple
@@ -12,6 +15,9 @@ import GHC.Int (Int64)
 import qualified Exception.Handler as E
 import Exception.Util (handles)
 
+-- |Attempt to select from the "attribute" table in the Sparkive database.
+--  If the selection fails, we say that the database does not exist or has 
+--  been partially deleted.
 checkDBExists :: Connection -> IO Bool
 checkDBExists conn = do
     eitherErrResults <- handles [E.handleSQLError] $ fmap Right (query_ conn "SELECT * FROM attribute" :: IO [[String]])
@@ -21,6 +27,8 @@ checkDBExists conn = do
                                -- for table nonexistence. TODO conjure a better way?
 
 -- TODO Incomplete and unsafe
+-- |Parse the "db/create.sql" file, and use it to create the necessary tables 
+--  for a Sparkive installation.
 createDB :: Connection -> String -> IO Int64
 createDB conn user = do
     let filepath = "db/create.sql"

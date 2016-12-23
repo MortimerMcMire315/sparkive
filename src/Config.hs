@@ -1,10 +1,11 @@
 {-# LANGUAGE FlexibleContexts #-}
 
-module Config where
+module Config ( parseConfig
+              , DBAuth(..) 
+              ) where
 
 import Data.ConfigFile
 import Control.Monad.IO.Class (liftIO)
---import Control.Monad.Throw (runExceptT, MonadError, withExceptT, ExceptT)
 import Control.Monad.Except (runExceptT)
 import Control.Monad.Catch (throwM, MonadThrow)
 import Control.Monad (join)
@@ -18,9 +19,10 @@ data DBAuth = DBAuth { host   :: String
                      , port   :: String
                      , dbname :: String} deriving Show
 
+-- |Attempt to parse the configuration file located in conf/sparkive.conf.
 parseConfig' :: IO (Either CPError DBAuth)
 parseConfig' = runExceptT $ do
-    cp <- join $ liftIO $ readfile emptyCP "conf/sparkive.conf"
+    cp <- join . liftIO $ readfile emptyCP "conf/sparkive.conf"
     host   <- get cp "Database" "host"
     user   <- get cp "Database" "user"
     pass   <- get cp "Database" "pass"
@@ -28,6 +30,8 @@ parseConfig' = runExceptT $ do
     dbname <- get cp "Database" "db_name"
     return $ DBAuth host user pass port dbname
 
+-- |Parse the configuration file as in 'parseConfig\'', but simply throw an exception
+--  if an error occurs.
 parseConfig :: IO DBAuth
 parseConfig = do
     pc <- parseConfig'
@@ -35,7 +39,8 @@ parseConfig = do
         Left cperr -> throwM (E.ConfigParseException $ prettyPrintErr cperr)
         Right x -> return x
 
---More on this later. Bad user experience for now
+
+-- |Return a string describing the given 'CPError' in a more user-friendly way.
 prettyPrintErr :: CPError -> String
 prettyPrintErr (errDat,errStr) = 
     case errDat of

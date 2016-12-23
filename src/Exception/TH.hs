@@ -1,6 +1,8 @@
 {-# LANGUAGE QuasiQuotes #-}
 
-module Exception.TH where
+module Exception.TH 
+     ( buildErrorHandler
+     ) where
 
 import Language.Haskell.TH.Syntax
 import Language.Haskell.TH.Quote (quoteDec)
@@ -8,12 +10,12 @@ import Data.Maybe (fromJust)
 import Data.Typeable.Internal (Typeable)
 import Control.Exception (Exception)
 
-{--
+{-|
    Given a name, i.e. ConfigParseException,
    - build a simple data type: data ConfigParseException String
    - make the data type an instance of Exception
    - create a handler function returning (m (Either String a)) with an appropriate type signature
---}
+-}
 buildErrorHandler :: String -> Q [Dec]
 buildErrorHandler s = do
     conName     <- newName s

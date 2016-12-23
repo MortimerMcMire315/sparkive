@@ -1,6 +1,9 @@
 {-# LANGUAGE OverloadedStrings, FlexibleContexts #-}
 
-module DB.Conn where
+module DB.Conn 
+    ( getConn
+    , exampleQuery
+    ) where
 
 import Database.PostgreSQL.Simple
 import Control.Monad.IO.Class (liftIO)
@@ -11,13 +14,15 @@ import Text.Read (readMaybe)
 import qualified Exception.Handler as E
 import qualified Config
 
--- uunngnghh monads are so tasty
+-- |Given a string, check if it represents a valid port number.
 checkPort :: String -> Maybe Word16
 checkPort unsafePort = (readMaybe unsafePort :: Maybe Int) >>= 
                            checkPortRange >>
                                (readMaybe unsafePort :: Maybe Word16)
-    where checkPortRange x = if x < 0 || x > 65535 then Nothing else Just x
+    where checkPortRange x = if x < 0 || x > 65535 then Nothing else Just ()
 
+-- |Try to connect to a PostgreSQL database using the given credentials. If this fails,
+--  catch the IOError and re-throw it as a 'E.SQLConnectionException'.
 tryConn :: Config.DBAuth -> Word16 -> IO Connection
 tryConn (Config.DBAuth host user pass _ dbname) safePort = do
            eitherConn <- handleIOError E.handleIOError' $ 
@@ -26,6 +31,9 @@ tryConn (Config.DBAuth host user pass _ dbname) safePort = do
                Left err   -> throwM (E.SQLConnectionException err)
                Right conn -> return conn 
 
+-- |Try to connect to a PostgreSQL database by parsing the user's config file.
+--  Throws 'E.InvalidPortException' if the port listed in the configuration is invalid
+--  and 'E.SQLConnectionException' if there is another error in connecting to the DB.
 getConn :: IO Connection
 getConn = do
     dbAuth <- Config.parseConfig

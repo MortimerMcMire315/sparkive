@@ -1,7 +1,22 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE RankNTypes #-}
 
-module Exception.Handler where
+module Exception.Handler 
+    ( ConfigParseException(..)
+    , InvalidPortException(..)
+    , ReadFileException(..)
+    , SQLConnectionException(..)
+    , handleConfigParseException
+    , handleInvalidPortException
+    , handleReadFileException
+    , handleSQLConnectionException
+    , handleIOError'
+    , handleSQLError
+    , handleSQLResultError
+    , handleSQLQueryError
+    , handleSQLFormatError
+    , sqlErrorHandlers
+    ) where
 
 import Data.Typeable.Internal (Typeable)
 import Control.Exception (Exception)
