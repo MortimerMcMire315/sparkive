@@ -1,5 +1,3 @@
-{-# LANGUAGE QuasiQuotes #-}
-
 module Exception.TH 
      ( buildErrorHandler
      ) where
@@ -34,9 +32,9 @@ handlerFDec conName handlerName = do
     maybeHandler <- lookupValueName "Handler"
     maybeLeftN   <- lookupValueName "Left"
     maybeReturn  <- lookupValueName "return"
-    handler      <- return $ fromJust maybeHandler
-    leftN        <- return $ fromJust maybeLeftN
-    returnN      <- return $ fromJust maybeReturn
+    let handler  =  fromJust maybeHandler
+    let leftN    =  fromJust maybeLeftN
+    let returnN  =  fromJust maybeReturn
 
     lambdaVar <- newName "str"
     return $ FunD 
@@ -44,7 +42,7 @@ handlerFDec conName handlerName = do
         [Clause 
             []
             (NormalB $ AppE 
-                         (ConE handler) $
+                         (ConE handler)
                          (LamE 
                             [ConP conName [VarP lambdaVar]] $
                             AppE (VarE returnN) $ AppE (ConE leftN) (VarE lambdaVar)
@@ -60,25 +58,25 @@ handlerFSig handlerName = do
     maybeMonadThrow <- lookupTypeName  "MonadThrow"
     maybeEither     <- lookupTypeName  "Either"
     maybeString     <- lookupTypeName  "String"
-    handlerT   <- return $ fromJust maybeHandlerT
-    monadCatch <- return $ fromJust maybeMonadCatch
-    monadThrow <- return $ fromJust maybeMonadThrow
-    eitherN    <- return $ fromJust maybeEither
-    string     <- return $ fromJust maybeString
+    let handlerT    =  fromJust maybeHandlerT
+    let monadCatch  =  fromJust maybeMonadCatch
+    let monadThrow  =  fromJust maybeMonadThrow
+    let eitherN     =  fromJust maybeEither
+    let string      =  fromJust maybeString
 
     monadTypeVar <- newName "m"
     anyTypeVar   <- newName "a"
 
     return $ SigD handlerName $ ForallT [PlainTV monadTypeVar, PlainTV anyTypeVar]
                 --Class constraints (m must be an instance of MonadCatch and MonadThrow)
-                ([AppT (ConT monadCatch) (VarT monadTypeVar), AppT (ConT monadThrow) (VarT monadTypeVar)]) $ --Class constraints
+                [AppT (ConT monadCatch) (VarT monadTypeVar), AppT (ConT monadThrow) (VarT monadTypeVar)] $ --Class constraints
                 -- Handler m (Either String a)
                 AppT (AppT (ConT handlerT) (VarT monadTypeVar)) $ AppT (AppT (ConT eitherN) $ ConT string) $ VarT anyTypeVar
 
 instanceDec :: Name -> Q Dec
 instanceDec typeName = do
-    maybeException  <- lookupTypeName  "Exception"
-    exception  <- return $ fromJust maybeException
+    maybeException <- lookupTypeName  "Exception"
+    let exception  = fromJust maybeException
 
     return $ InstanceD 
                 Nothing 
@@ -88,13 +86,13 @@ instanceDec typeName = do
 
 dataDec :: Name -> Name -> Q Dec
 dataDec conName typeName = do
-    maybeTypeable   <- lookupTypeName  "Typeable"
-    maybeShow       <- lookupTypeName  "Show"
-    maybeString     <- lookupTypeName  "String"
-    typeable   <- return $ fromJust maybeTypeable
-    show       <- return $ fromJust maybeShow
-    string     <- return $ fromJust maybeString
+    maybeTypeable <- lookupTypeName  "Typeable"
+    maybeShow     <- lookupTypeName  "Show"
+    maybeString   <- lookupTypeName  "String"
+    let typeable  = fromJust maybeTypeable
+    let show      = fromJust maybeShow
+    let string    = fromJust maybeString
 
-    let nobang = Bang NoSourceUnpackedness NoSourceStrictness
-    let typecon = [NormalC conName [(nobang, ConT string)]]
+    let nobang    = Bang NoSourceUnpackedness NoSourceStrictness
+    let typecon   = [NormalC conName [(nobang, ConT string)]]
     return $ DataD [] typeName [] Nothing typecon [ConT show, ConT typeable]

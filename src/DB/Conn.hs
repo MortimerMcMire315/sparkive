@@ -40,7 +40,7 @@ getConn = do
     let unsafePort = Config.port dbAuth
     let invalidPortStr = "The port \"" ++ unsafePort ++ "\" specified in sparkive.conf has an invalid format. \
                          \Please check that it is an integer between 0 and 65535."
-    maybePort <- return $ checkPort unsafePort
+    let maybePort = checkPort unsafePort
     case maybePort of
         Nothing   -> throwM $ E.InvalidPortException invalidPortStr
         Just p -> tryConn dbAuth p

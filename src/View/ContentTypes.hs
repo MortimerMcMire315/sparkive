@@ -12,5 +12,5 @@ getMimeString ct = case ct of
 
 -- |Convert the given data to a response, and add a corresponding Content-Type header
 toResMime :: ToMessage a => a -> MIMEType -> Response
-toResMime dat mimeType = (toResponse dat) {rsHeaders=(mkHeaders [("Content-Type", getMimeString mimeType)])}
+toResMime dat mimeType = (toResponse dat) {rsHeaders = mkHeaders [("Content-Type", getMimeString mimeType)]}
 

@@ -17,7 +17,7 @@ routes :: ServerPart Response
 routes = do
     decodeBody myPolicy
     msum [ 
-           dir "css"      $ Views.serveCSS
+           dir "css"        Views.serveCSS
          , nullDir       >> Views.homePage
          ]
 

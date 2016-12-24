@@ -28,7 +28,7 @@ serveCSS = path $ \(cssRequest :: String) ->
                 _            -> notFound $ toResponse ("CSS stylesheet not found." :: String)
                 -- Make sure the request is sane (no path segments after *.css);
                 -- if so, serve the file with MIME type "text/css"
-                where nullDirServe template = nullDir >> (ok $ (CT.toResMime template CT.CSS))
+                where nullDirServe template = nullDir >> ok (CT.toResMime template CT.CSS)
 
 
 -- |Attempt to run a SQL query given a 'Connection', a query function, and a
@@ -38,7 +38,7 @@ serveCSS = path $ \(cssRequest :: String) ->
 tryQuery :: Connection -> (Connection -> IO a) -> (a -> IO Html) -> IO Html
 tryQuery conn queryF successAction = do
     eitherErrResults <- catches
-                            (fmap Right $ queryF conn)
+                            (Right <$> queryF conn)
                             [E.handleSQLError]
     case eitherErrResults of
         Left err        -> return $ Template.errBoxT err
@@ -76,17 +76,15 @@ withConn failAction successAction = do
 -- which returns HTML to display on success. If the connection fails, return
 -- the HTML for an error box containing a string to display to the user.
 withConnErrBox :: (Connection -> IO Html) -> IO Html
-withConnErrBox = withConn (\err -> return $ Template.errBoxT err)
+withConnErrBox = withConn (return . Template.errBoxT)
 
 {-- The homepage is really just a sandbox for now. --}
 homePage :: ServerPart Response
 homePage = do
     toInsert <- liftIO $ withConnErrBox 
-        (\conn -> do
+        (\conn ->
             --Query.createDB conn "sparkive"
             --return $ Template.errBoxT "Not really an error."
-            tryQuery conn DB.exampleQuery (\results ->
-                  return $ Template.genericResultT results
-                                          )
+            tryQuery conn DB.exampleQuery (return . Template.genericResultT)
         )
     ok . toResponse $ Template.homePageT toInsert

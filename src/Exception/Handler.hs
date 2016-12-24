@@ -31,8 +31,8 @@ htmlNewlines str = htmlNewlines' str ""
 htmlNewlines' :: String -> String -> String
 htmlNewlines' "" scanned = reverse scanned
 htmlNewlines' (x:xs) scanned = if x == '\n' 
-                                then htmlNewlines' xs $ ('>':'r':'b':'<':scanned)
-                                else htmlNewlines' xs $ (x:scanned)
+                               then htmlNewlines' xs ('>':'r':'b':'<':scanned)
+                               else htmlNewlines' xs (x:scanned)
 
 $(buildErrorHandler "ConfigParseException")
 $(buildErrorHandler "InvalidPortException")
@@ -43,7 +43,7 @@ $(buildErrorHandler "ReadFileException")
 -- 'Database.PostgreSQL.Simple'. The error comes from libPQ and uses throwIO.
 handleIOError' :: IOError -> IO (Either String a)
 handleIOError' e = do
-    putStrLn $ show e
+    print e
     return . Left . htmlNewlines $ show e
 
 {----------------}
@@ -54,8 +54,8 @@ $(buildErrorHandler "SQLConnectionException")
 
 -- |See Database.PostgreSQL.Simple.SqlError
 handleSQLError :: (MonadCatch m, MonadThrow m) => Handler m (Either String a)
-handleSQLError = Handler (\(SqlError state status msg detail hint) -> do
-                            return . Left $ prefix ++ (show msg))
+handleSQLError = Handler (\(SqlError state status msg detail hint) ->
+                            return . Left $ prefix ++ show msg)
     where prefix = "The PostgreSQL backend returned an error: "
 
 -- |See 'Database.PostgreSQL.Simple.ResultError'
@@ -83,14 +83,14 @@ handleSQLResultError = Handler
 -- |See Database.PostgreSQL.Simple.QueryError
 handleSQLQueryError :: (MonadCatch m, MonadThrow m) => Handler m (Either String a)
 handleSQLQueryError = Handler
-    (\(QueryError _ _ ) -> return . Left $ "QueryError: the 'query' function was used to perform an INSERT-like " ++
+    (\QueryError{} -> return . Left $ "QueryError: the 'query' function was used to perform an INSERT-like " ++
                         "operation, or 'execute' was used to perform a SELECT-like operation."
     )
 
 -- |See Database.PostgreSQL.Simple.FormatError
 handleSQLFormatError :: (MonadCatch m, MonadThrow m) => Handler m (Either String a)
 handleSQLFormatError = Handler
-    (\(FormatError _ _ _) -> return . Left $ "FormatError: The SQL query could not be formatted correctly.")
+    (\FormatError{} -> return . Left $ "FormatError: The SQL query could not be formatted correctly.")
 
 -- Convenient to include these all at once when running queries.
 sqlErrorHandlers :: (MonadCatch m, MonadThrow m) => [Handler m (Either String a)]
