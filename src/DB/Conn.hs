@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings, FlexibleContexts #-}
 
-module DB.Conn 
+module DB.Conn
     ( getConn
     , exampleQuery
     ) where
@@ -16,7 +16,7 @@ import qualified Config
 
 -- |Given a string, check if it represents a valid port number.
 checkPort :: String -> Maybe Word16
-checkPort unsafePort = (readMaybe unsafePort :: Maybe Int) >>= 
+checkPort unsafePort = (readMaybe unsafePort :: Maybe Int) >>=
                            checkPortRange >>
                                (readMaybe unsafePort :: Maybe Word16)
     where checkPortRange x = if x < 0 || x > 65535 then Nothing else Just ()
@@ -25,11 +25,11 @@ checkPort unsafePort = (readMaybe unsafePort :: Maybe Int) >>=
 --  catch the IOError and re-throw it as a 'E.SQLConnectionException'.
 tryConn :: Config.DBAuth -> Word16 -> IO Connection
 tryConn (Config.DBAuth host user pass _ dbname) safePort = do
-           eitherConn <- handleIOError E.handleIOError' $ 
+           eitherConn <- handleIOError E.handleIOError' $
                             fmap Right . connect $ ConnectInfo host safePort user pass dbname
            case eitherConn of
                Left err   -> throwM (E.SQLConnectionException err)
-               Right conn -> return conn 
+               Right conn -> return conn
 
 -- |Try to connect to a PostgreSQL database by parsing the user's config file.
 --  Throws 'E.InvalidPortException' if the port listed in the configuration is invalid

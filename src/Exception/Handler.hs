@@ -1,7 +1,7 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE RankNTypes #-}
 
-module Exception.Handler 
+module Exception.Handler
     ( ConfigParseException(..)
     , InvalidPortException(..)
     , ReadFileException(..)
@@ -30,7 +30,7 @@ htmlNewlines str = htmlNewlines' str ""
 
 htmlNewlines' :: String -> String -> String
 htmlNewlines' "" scanned = reverse scanned
-htmlNewlines' (x:xs) scanned = if x == '\n' 
+htmlNewlines' (x:xs) scanned = if x == '\n'
                                then htmlNewlines' xs ('>':'r':'b':'<':scanned)
                                else htmlNewlines' xs (x:scanned)
 
@@ -60,20 +60,20 @@ handleSQLError = Handler (\(SqlError state status msg detail hint) ->
 
 -- |See 'Database.PostgreSQL.Simple.ResultError'
 handleSQLResultError :: (MonadCatch m, MonadThrow m) => Handler m (Either String a)
-handleSQLResultError = Handler 
-    (\err -> case err of 
+handleSQLResultError = Handler
+    (\err -> case err of
         (Incompatible sqlType sqlTableOid sqlField haskellType msg) ->
-            return . Left $ prefix ++ "The SQL type " ++ sqlType ++ 
+            return . Left $ prefix ++ "The SQL type " ++ sqlType ++
                             " is not compatible with the Haskell type "
-                            ++ haskellType ++ ". <br><br>Additional info: <br><br>" 
+                            ++ haskellType ++ ". <br><br>Additional info: <br><br>"
                             ++ msg
         (UnexpectedNull sqlType sqlTableOid sqlField haskellType msg) ->
-            return . Left $ prefix ++ "The SQL type " ++ sqlType ++ 
+            return . Left $ prefix ++ "The SQL type " ++ sqlType ++
                             " returned NULL, while the Haskell type "
                             ++ haskellType ++ " does not permit null values."
                             ++ "<br><br>Additional info: <br><br>" ++ msg
         (ConversionFailed sqlType sqlTableOid sqlField haskellType msg) ->
-            return . Left $ prefix ++ "Conversion failed: A SQL value of type " ++ sqlType ++ 
+            return . Left $ prefix ++ "Conversion failed: A SQL value of type " ++ sqlType ++
                             " could not be represented as a value of Haskell type "
                             ++ haskellType ++ ", or else a low-level error occured."
                             ++ "<br><br>Additional info: <br><br>" ++ msg

@@ -2,8 +2,6 @@
 <html>
     <body>
         ^{mainPageBannerT}
-            <div #content>
-                <div .text-button-container>
-                    <a href="#" .text-button>Create Database
-                <!--^{toDisplay}-->
+        ^{toDisplay}
+        <script src="/js/create-db-button.js">
         ^{footerT}

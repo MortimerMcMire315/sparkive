@@ -1,0 +1,13 @@
+var btn = $(".create-db-button");
+
+btn.click(function() {
+    alert("hello!");
+    $.ajax({
+        url: "/ajax/create-db"
+    })
+     .done(function(data) {
+         btn.parent().append('<div id="ajax-response"><span class="blank"></span></div>');
+         btn.remove();
+         $('div#ajax-response span.blank').append(data);
+     });
+});

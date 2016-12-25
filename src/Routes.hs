@@ -1,4 +1,4 @@
-module Routes 
+module Routes
     ( routes
     ) where
 
@@ -16,8 +16,10 @@ myPolicy = defaultBodyPolicy "/tmp/" 0 1000 1000
 routes :: ServerPart Response
 routes = do
     decodeBody myPolicy
-    msum [ 
-           dir "css"        Views.serveCSS
-         , nullDir       >> Views.homePage
+    msum [
+           dir  "css"                   Views.serveCSS
+         , dir  "js"                    Views.serveJS
+         , dirs "ajax/create-db"        Views.createDBButton
+         , nullDir                   >> Views.homePage
          ]
 
