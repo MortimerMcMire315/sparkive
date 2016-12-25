@@ -1,7 +1,7 @@
 {-# LANGUAGE FlexibleContexts #-}
 
 module Config ( parseConfig
-              , DBAuth(..) 
+              , DBAuth(..)
               ) where
 
 import Data.ConfigFile
@@ -15,7 +15,7 @@ import qualified Exception.Handler as E
 
 data DBAuth = DBAuth { host   :: String
                      , user   :: String
-                     , pass   :: String 
+                     , pass   :: String
                      , port   :: String
                      , dbname :: String} deriving Show
 
@@ -42,7 +42,7 @@ parseConfig = do
 
 -- |Return a string describing the given 'CPError' in a more user-friendly way.
 prettyPrintErr :: CPError -> String
-prettyPrintErr (errDat,errStr) = 
+prettyPrintErr (errDat,errStr) =
     case errDat of
         ParseError str -> "The " ++ confFile ++ " appears to be malformed. Here's the parse error: " ++ str
         NoSection str -> "The section \"" ++ str ++ "\" does not exist in the " ++ confFile ++ "."
@@ -51,4 +51,3 @@ prettyPrintErr (errDat,errStr) =
         _ -> error "Could not process configuration file."
 
     where confFile = "configuration file for this Sparkive installation (sparkive.conf)"
-    

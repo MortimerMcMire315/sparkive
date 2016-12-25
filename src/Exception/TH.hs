@@ -1,4 +1,4 @@
-module Exception.TH 
+module Exception.TH
      ( buildErrorHandler
      ) where
 
@@ -37,13 +37,13 @@ handlerFDec conName handlerName = do
     let returnN  =  fromJust maybeReturn
 
     lambdaVar <- newName "str"
-    return $ FunD 
-        handlerName 
-        [Clause 
+    return $ FunD
+        handlerName
+        [Clause
             []
-            (NormalB $ AppE 
+            (NormalB $ AppE
                          (ConE handler)
-                         (LamE 
+                         (LamE
                             [ConP conName [VarP lambdaVar]] $
                             AppE (VarE returnN) $ AppE (ConE leftN) (VarE lambdaVar)
                          )
@@ -78,9 +78,9 @@ instanceDec typeName = do
     maybeException <- lookupTypeName  "Exception"
     let exception  = fromJust maybeException
 
-    return $ InstanceD 
-                Nothing 
-                [] 
+    return $ InstanceD
+                Nothing
+                []
                 (AppT (ConT exception) (ConT typeName))
                 []
 

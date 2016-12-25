@@ -1,4 +1,4 @@
-module Exception.Util 
+module Exception.Util
     ( handles
     ) where
 
