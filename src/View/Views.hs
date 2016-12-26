@@ -7,11 +7,15 @@ module View.Views
     , serveCSS
     , serveJS
     , createDBButton
+    , login
+    , testCreateAccount --Actually put this in the tests.
+    , testCheckPass     -- ^^^^
     ) where
 
-import Happstack.Server (ok, toResponse, ServerPart, Response, path, notFound, nullDir)
+import Happstack.Server
 
 import Database.PostgreSQL.Simple (Connection)
+import Control.Monad (msum)
 import Control.Monad.Catch (catches)
 import Control.Monad.IO.Class (liftIO)
 import Text.Hamlet (Html)
@@ -20,6 +24,7 @@ import qualified DB.Conn as DB
 import qualified DB.Query as Query
 import qualified Exception.Handler as E
 import qualified View.Template as Template
+import qualified Auth.Login as Login
 import View.ContentTypes (MIMEType(CSS, JS, HTML), toResMime)
 
 -- Make sure the request is sane (no path segments after *.css or *.js or whatever);
@@ -78,7 +83,7 @@ tryQuery conn queryF successAction = do
 --                                                        )
 --                        )
 -- @
-withConn :: (String -> IO Html) -> (Connection -> IO Html) -> IO Html
+withConn :: (String -> IO a) -> (Connection -> IO a) -> IO a
 withConn failAction successAction = do
     eitherErrConn <- catches
                         (fmap Right DB.getConn)
@@ -96,6 +101,31 @@ withConn failAction successAction = do
 -- the HTML for an error box containing a string to display to the user.
 withConnErrBox :: (Connection -> IO Html) -> IO Html
 withConnErrBox = withConn (return . Template.errBoxT)
+
+login :: ServerPart Response
+login = msum [ method [GET,HEAD] >> (ok $ toResponse Template.loginPageT)
+--           , method POST >> doLogin
+             ]
+
+testCreateAccount :: String -> String -> IO ()
+testCreateAccount username pass =
+    withConn (\err -> print err)
+             (\conn -> do
+                 res <- Login.storeUser username pass conn
+                 case res of
+                     Left err -> print err
+                     Right _ -> putStrLn "Success!"
+             )
+
+testCheckPass :: String -> String -> IO ()
+testCheckPass username pass =
+    withConn (\err -> print err)
+             (\conn -> do
+                 res <- Login.isCorrectPass username pass conn
+                 case res of
+                    Left err -> print err
+                    Right collision -> putStrLn $ show collision
+             )
 
 {-- The homepage is really just a sandbox for now. --}
 homePage :: ServerPart Response

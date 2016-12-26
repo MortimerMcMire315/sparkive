@@ -3,6 +3,8 @@
 module DB.Query
     ( createDB
     , checkDBExists
+    , insertUser
+    , getPassHash
     ) where
 
 import Control.Monad.IO.Class (liftIO)
@@ -11,6 +13,7 @@ import Control.Monad.Catch (catches, catch, throwM)
 import Data.String.Utils (replace)
 import System.IO.Error (IOError)
 import GHC.Int (Int64)
+import Data.ByteString (ByteString)
 
 import qualified Exception.Handler as E
 import Exception.Util (handles)
@@ -42,3 +45,14 @@ createDB user conn = do
 
     let (q :: Query) = read . show $ replace "%user%" user f
     execute_ conn q
+
+insertUser :: String -> ByteString -> Connection -> IO Int64
+insertUser username pass conn =
+    execute conn "INSERT INTO sparkive_user (username, pass) VALUES (?,?)" (username, pass)
+
+-- |Throws GHC.Exception.ErrorCall and all SQL exceptions.
+--  Handle with handleErrorCall and sqlErrorHandlers.
+getPassHash :: String -> Connection -> IO [ByteString]
+getPassHash username conn = do
+    results <- query conn "SELECT pass FROM sparkive_user WHERE username = ?" (Only username)
+    return $ map fromOnly results

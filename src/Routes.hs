@@ -20,6 +20,7 @@ routes = do
            dir  "css"                   Views.serveCSS
          , dir  "js"                    Views.serveJS
          , dirs "ajax/create-db"        Views.createDBButton
+         , dir  "login"                 Views.login
          , nullDir                   >> Views.homePage
          ]
 

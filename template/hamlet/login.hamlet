@@ -1,0 +1,5 @@
+<html>
+    ^{headerT}
+    ^{mainPageBannerT}
+    <div #loginFields>
+        <form action="/login">

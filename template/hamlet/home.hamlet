@@ -1,7 +1,8 @@
-^{headerT}
 <html>
-    <body>
-        ^{mainPageBannerT}
-        ^{toDisplay}
-        <script src="/js/create-db-button.js">
-        ^{footerT}
+    ^{headerT}
+        <body>
+            ^{mainPageBannerT}
+            <a href="/login">Login
+            <!--^{toDisplay}-->
+            <script src="/js/create-db-button.js">
+            ^{footerT}

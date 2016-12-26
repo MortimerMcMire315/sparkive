@@ -10,6 +10,7 @@ module Exception.Handler
     , handleInvalidPortException
     , handleReadFileException
     , handleSQLConnectionException
+    , handleErrorCall
     , handleIOError'
     , handleSQLError
     , handleSQLResultError
@@ -19,7 +20,7 @@ module Exception.Handler
     ) where
 
 import Data.Typeable.Internal (Typeable)
-import Control.Exception (Exception)
+import Control.Exception (Exception, ErrorCall(..))
 import Control.Monad.Catch (Handler (..), MonadCatch, MonadThrow)
 import Database.PostgreSQL.Simple (SqlError(..), ResultError(..), QueryError(..), FormatError(..))
 
@@ -42,9 +43,12 @@ $(buildErrorHandler "ReadFileException")
 -- with errors from invalid attempts to use the "connect" function in
 -- 'Database.PostgreSQL.Simple'. The error comes from libPQ and uses throwIO.
 handleIOError' :: IOError -> IO (Either String a)
-handleIOError' e = do
-    print e
-    return . Left . htmlNewlines $ show e
+handleIOError' e = return . Left . htmlNewlines $ show e
+
+-- |GHC Exception constructor used for things like (head []) and (read "a" :: Int)
+--  (actually, whenever "error" is used. Hence the name.)
+handleErrorCall :: (MonadCatch m, MonadThrow m) => Handler m (Either String a)
+handleErrorCall = Handler (\(ErrorCall str) -> return . Left . htmlNewlines $ show str)
 
 {----------------}
 {-- SQL ERRORS --}

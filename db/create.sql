@@ -170,6 +170,40 @@ ALTER SEQUENCE item_id_seq OWNED BY item.id;
 
 
 --
+-- Name: sparkive_user; Type: TABLE; Schema: public; Owner: %user%
+--
+
+CREATE TABLE sparkive_user (
+    id integer NOT NULL,
+    username text NOT NULL,
+    pass bytea NOT NULL
+);
+
+
+ALTER TABLE sparkive_user OWNER TO %user%;
+
+--
+-- Name: sparkive_user_id_seq; Type: SEQUENCE; Schema: public; Owner: %user%
+--
+
+CREATE SEQUENCE sparkive_user_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE sparkive_user_id_seq OWNER TO %user%;
+
+--
+-- Name: sparkive_user_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: %user%
+--
+
+ALTER SEQUENCE sparkive_user_id_seq OWNED BY sparkive_user.id;
+
+
+--
 -- Name: attr_values id; Type: DEFAULT; Schema: public; Owner: %user%
 --
 
@@ -195,6 +229,13 @@ ALTER TABLE ONLY item ALTER COLUMN id SET DEFAULT nextval('item_id_seq'::regclas
 --
 
 ALTER TABLE ONLY item_attrs ALTER COLUMN id SET DEFAULT nextval('item_attrs_id_seq'::regclass);
+
+
+--
+-- Name: sparkive_user id; Type: DEFAULT; Schema: public; Owner: %user%
+--
+
+ALTER TABLE ONLY sparkive_user ALTER COLUMN id SET DEFAULT nextval('sparkive_user_id_seq'::regclass);
 
 
 --
@@ -269,6 +310,19 @@ SELECT pg_catalog.setval('item_id_seq', 4, true);
 
 
 --
+-- Data for Name: sparkive_user; Type: TABLE DATA; Schema: public; Owner: %user%
+--
+
+
+
+--
+-- Name: sparkive_user_id_seq; Type: SEQUENCE SET; Schema: public; Owner: %user%
+--
+
+SELECT pg_catalog.setval('sparkive_user_id_seq', 1, false);
+
+
+--
 -- Name: attr_values attr_values_pk; Type: CONSTRAINT; Schema: public; Owner: %user%
 --
 
@@ -298,6 +352,14 @@ ALTER TABLE ONLY item_attrs
 
 ALTER TABLE ONLY item
     ADD CONSTRAINT item_pk PRIMARY KEY (id);
+
+
+--
+-- Name: sparkive_user user_pk; Type: CONSTRAINT; Schema: public; Owner: %user%
+--
+
+ALTER TABLE ONLY sparkive_user
+    ADD CONSTRAINT user_pk PRIMARY KEY (id);
 
 
 --

@@ -36,5 +36,8 @@ genericResultT results = $(shamletFile $ hamFile "genericResult")
 createDBButtonT :: Html
 createDBButtonT = $(shamletFile $ hamFile "createDBButton")
 
+loginPageT :: Html
+loginPageT = $(shamletFile $ hamFile "login")
+
 homePageT :: Html -> Html
 homePageT toDisplay = $(shamletFile $ hamFile "home")
