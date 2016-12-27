@@ -27,6 +27,7 @@ library
                      , Exception.TH
                      , Exception.Util
                      , DB.AcidStateBackend
+                     , DB.PostgresBackend
                      , DB.Conn
                      , DB.Types
                      , DB.Query

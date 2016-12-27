@@ -14,7 +14,6 @@ import Control.Monad.State (get, put)
 
 data User = User { username   :: String
                  , hashedPass :: ByteString
-                 , salt       :: ByteString
                  }
 
 newtype Attribute = Attribute { name :: String }
@@ -37,14 +36,20 @@ $(deriveSafeCopy 0 'base ''Attribute)
 $(deriveSafeCopy 0 'base ''Item)
 $(deriveSafeCopy 0 'base ''Archive)
 
-addUser :: User -> Update Archive ()
-addUser u = get >>= (\db -> let us = users db in
-                        put $ db { users = u:us }
-                    )
+insertUser :: String -> ByteString -> Update Archive ()
+insertUser u passHash = get >>=
+    (\db -> let us = users db in
+        put $ db { users = User u passHash:us }
+    )
 
 getUserByName :: String -> Query Archive User
 getUserByName name = do
     db <- ask
     return . head $ users db
 
-$(makeAcidic ''Archive ['addUser, 'getUserByName])
+getPassHash :: String -> Query Archive [ByteString]
+getPassHash name = do
+    db <- ask
+    return [ hashedPass x | x <- users db, username x == name ]
+
+$(makeAcidic ''Archive ['insertUser, 'getUserByName, 'getPassHash])
