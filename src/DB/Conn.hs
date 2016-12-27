@@ -6,13 +6,18 @@ module DB.Conn
     ) where
 
 import Database.PostgreSQL.Simple
+import Data.Acid (openLocalStateFrom)
 import Control.Monad.IO.Class (liftIO)
-import Control.Monad.Catch (handleIOError, throwM)
+import Control.Monad (join)
+import Control.Monad.Catch (handleIOError, throwM, catches)
 import GHC.Word (Word16)
 import Text.Read (readMaybe)
+import Data.Default (def)
 
 import qualified Exception.Handler as E
 import qualified Config
+import DB.Types
+import DB.AcidStateBackend (Archive)
 
 -- |Given a string, check if it represents a valid port number.
 checkPort :: String -> Maybe Word16
@@ -23,27 +28,43 @@ checkPort unsafePort = (readMaybe unsafePort :: Maybe Int) >>=
 
 -- |Try to connect to a PostgreSQL database using the given credentials. If this fails,
 --  catch the IOError and re-throw it as a 'E.SQLConnectionException'.
-tryConn :: Config.DBAuth -> Word16 -> IO Connection
-tryConn (Config.DBAuth host user pass _ dbname) safePort = do
+tryPostgresConn :: PostgresAuth -> Word16 -> IO Connection
+tryPostgresConn (PostgresAuth host user pass _ dbname) safePort = do
            eitherConn <- handleIOError E.handleIOError' $
                             fmap Right . connect $ ConnectInfo host safePort user pass dbname
            case eitherConn of
                Left err   -> throwM (E.SQLConnectionException err)
                Right conn -> return conn
 
--- |Try to connect to a PostgreSQL database by parsing the user's config file.
---  Throws 'E.InvalidPortException' if the port listed in the configuration is invalid
---  and 'E.SQLConnectionException' if there is another error in connecting to the DB.
-getConn :: IO Connection
-getConn = do
-    dbAuth <- Config.parseConfig
-    let unsafePort = Config.port dbAuth
+getPostgresConn :: PostgresAuth -> IO DBConn
+getPostgresConn postgresAuth = do
+    let unsafePort = port postgresAuth
     let invalidPortStr = "The port \"" ++ unsafePort ++ "\" specified in sparkive.conf has an invalid format. \
                          \Please check that it is an integer between 0 and 65535."
     let maybePort = checkPort unsafePort
     case maybePort of
-        Nothing   -> throwM $ E.InvalidPortException invalidPortStr
-        Just p -> tryConn dbAuth p
+        Nothing -> throwM $ E.InvalidPortException invalidPortStr
+        Just p  -> fmap (PostgresConn (user postgresAuth)) (tryPostgresConn postgresAuth p)
+
+getAcidStateConn :: FilePath -> IO DBConn
+getAcidStateConn p = fmap (AcidStateConn p) (openLocalStateFrom p (def::Archive))
+
+-- |Try to connect to a PostgreSQL database by parsing the user's config file.
+--  Returns either an error string or a connection.
+getConn :: IO (Either String DBConn)
+getConn = do
+   dbInfo <- catches (Right <$> Config.parseConfig) [ E.handleConfigParseException ]
+   case dbInfo of
+       Left err -> return $ Left err
+       Right info ->
+           case info of
+               PostgresInfo dbauth ->
+                   catches (Right <$> getPostgresConn dbauth)
+                           [ E.handleInvalidPortException
+                           , E.handleSQLConnectionException ]
+               AcidStateInfo dir ->
+                   catches (Right <$> getAcidStateConn dir)
+                           [ E.handleErrorCall ]
 
 exampleQuery :: Connection -> IO [[String]]
 exampleQuery conn = liftIO $ query_ conn "SELECT attribute.attr_name,attr_values.attr_value \

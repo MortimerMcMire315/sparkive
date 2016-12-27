@@ -14,12 +14,12 @@ module View.Views
 
 import Happstack.Server
 
-import Database.PostgreSQL.Simple (Connection)
 import Control.Monad (msum)
 import Control.Monad.Catch (catches)
 import Control.Monad.IO.Class (liftIO)
 import Text.Hamlet (Html)
 
+import DB.Types (DBConn)
 import qualified DB.Conn as DB
 import qualified DB.Query as Query
 import qualified Exception.Handler as E
@@ -55,11 +55,11 @@ createDBButton = do
         )
     ok $ toResponse results
 
--- |Attempt to run a SQL query given a 'Connection', a query function, and a
+-- |Attempt to run a SQL query given a 'DBConn', a query function, and a
 -- function to run on success. The success function uses the results of the
 -- query to construct an HTML fragment. On failure, uses 'Template.errBoxT' to
 -- display an error on the frontend.
-tryQuery :: Connection -> (Connection -> IO a) -> (a -> IO Html) -> IO Html
+tryQuery :: DBConn -> (DBConn -> IO a) -> (a -> IO Html) -> IO Html
 tryQuery conn queryF successAction = do
     eitherErrResults <- catches
                             (Right <$> queryF conn)
@@ -83,33 +83,30 @@ tryQuery conn queryF successAction = do
 --                                                        )
 --                        )
 -- @
-withConn :: (String -> IO a) -> (Connection -> IO a) -> IO a
-withConn failAction successAction = do
-    eitherErrConn <- catches
-                        (fmap Right DB.getConn)
-                           [
-                             E.handleConfigParseException
-                           , E.handleSQLConnectionException
-                           , E.handleInvalidPortException
-                           ]
-    case eitherErrConn of
-        Left err   -> failAction err
-        Right conn -> successAction conn
+withConn :: (String -> IO a) -> (DBConn -> IO a) -> IO a
+withConn failAction successAction =
+    DB.getConn >>=
+      (\eitherConn ->
+        case eitherConn of
+            Left err   -> failAction err
+            Right conn -> successAction conn
+      )
+
 
 -- |Attempt to open a DB connection. If it succeeds, run the given IO action,
 -- which returns HTML to display on success. If the connection fails, return
 -- the HTML for an error box containing a string to display to the user.
-withConnErrBox :: (Connection -> IO Html) -> IO Html
+withConnErrBox :: (DBConn -> IO Html) -> IO Html
 withConnErrBox = withConn (return . Template.errBoxT)
 
 login :: ServerPart Response
-login = msum [ method [GET,HEAD] >> (ok $ toResponse Template.loginPageT)
+login = msum [ method [GET,HEAD] >> ok (toResponse Template.loginPageT)
 --           , method POST >> doLogin
              ]
 
 testCreateAccount :: String -> String -> IO ()
 testCreateAccount username pass =
-    withConn (\err -> print err)
+    withConn print
              (\conn -> do
                  res <- Login.storeUser username pass conn
                  case res of
@@ -119,12 +116,12 @@ testCreateAccount username pass =
 
 testCheckPass :: String -> String -> IO ()
 testCheckPass username pass =
-    withConn (\err -> print err)
+    withConn print
              (\conn -> do
                  res <- Login.isCorrectPass username pass conn
                  case res of
                     Left err -> print err
-                    Right collision -> putStrLn $ show collision
+                    Right collision -> print collision
              )
 
 {-- The homepage is really just a sandbox for now. --}

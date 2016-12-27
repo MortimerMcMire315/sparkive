@@ -1,7 +1,6 @@
 {-# LANGUAGE FlexibleContexts #-}
 
 module Config ( parseConfig
-              , DBAuth(..)
               ) where
 
 import Data.ConfigFile
@@ -11,28 +10,32 @@ import Control.Monad.Catch (throwM, MonadThrow)
 import Control.Monad (join)
 
 import qualified Exception.Handler as E
-
-
-data DBAuth = DBAuth { host   :: String
-                     , user   :: String
-                     , pass   :: String
-                     , port   :: String
-                     , dbname :: String} deriving Show
+import DB.Types
 
 -- |Attempt to parse the configuration file located in conf/sparkive.conf.
-parseConfig' :: IO (Either CPError DBAuth)
+parseConfig' :: IO (Either CPError DBInfo)
 parseConfig' = runExceptT $ do
     cp <- join . liftIO $ readfile emptyCP "conf/sparkive.conf"
-    host   <- get cp "Database" "host"
-    user   <- get cp "Database" "user"
-    pass   <- get cp "Database" "pass"
-    port   <- get cp "Database" "port"
-    dbname <- get cp "Database" "db_name"
-    return $ DBAuth host user pass port dbname
+    backend <- get cp "Database" "backend"
+    if backend == "postgres"
+    then do
+        host   <- get cp "Postgres" "host"
+        user   <- get cp "Postgres" "user"
+        pass   <- get cp "Postgres" "pass"
+        port   <- get cp "Postgres" "port"
+        dbname <- get cp "Postgres" "db_name"
+        return . PostgresInfo $ PostgresAuth host user pass port dbname
+    else if backend == "acid-state"
+         then do
+            acidPath <- get cp "Acid-State" "dir"
+            return $ AcidStateInfo acidPath
+         else liftIO . throwM $ E.ConfigParseException wrongDBType
+  where wrongDBType = "Database type in sparkive.conf must be either \"acid-state\" or \"postgres\""
+
 
 -- |Parse the configuration file as in 'parseConfig\'', but simply throw an exception
 --  if an error occurs.
-parseConfig :: IO DBAuth
+parseConfig :: IO DBInfo
 parseConfig = do
     pc <- parseConfig'
     case pc of
