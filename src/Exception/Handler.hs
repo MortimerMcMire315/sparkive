@@ -6,6 +6,7 @@ module Exception.Handler
     , InvalidPortException(..)
     , ReadFileException(..)
     , SQLConnectionException(..)
+    , UsernameTakenException(..)
     , handleConfigParseException
     , handleInvalidPortException
     , handleReadFileException
@@ -16,6 +17,7 @@ module Exception.Handler
     , handleSQLResultError
     , handleSQLQueryError
     , handleSQLFormatError
+    , handleUsernameTakenException
     , sqlErrorHandlers
     ) where
 
@@ -99,3 +101,9 @@ handleSQLFormatError = Handler
 -- Convenient to include these all at once when running queries.
 sqlErrorHandlers :: (MonadCatch m, MonadThrow m) => [Handler m (Either String a)]
 sqlErrorHandlers = [handleSQLError, handleSQLResultError, handleSQLQueryError, handleSQLFormatError]
+
+{--------------------------}
+{-- USER-FRIENDLY ERRORS --}
+{--------------------------}
+
+$(buildErrorHandler "UsernameTakenException")

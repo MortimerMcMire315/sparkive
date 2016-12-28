@@ -27,8 +27,8 @@ import View.ContentTypes (MIMEType(CSS, JS, HTML), toResMime)
 
 type EDBConn = Either String DBConn
 
--- Make sure the request is sane (no path segments after *.css or *.js or whatever);
--- if so, serve the file with MIME type "text/css"
+-- Make sure the request is sane (no path segments after *.css or *.js or
+-- whatever); if so, serve the file with MIME type "text/css"
 --nullDirServe :: ServerPart Response
 nullDirServe template mimeT = nullDir >> ok (toResMime template mimeT)
 
@@ -59,22 +59,17 @@ createDBButton :: EDBConn -> ServerPart Response
 createDBButton eitherConn = do
     results <- liftIO $ withConnErrBox eitherConn
         (\conn -> tryQuery conn (Query.createDB "sparkive")
-                                --const allows us to ignore the result
-                                --(const $ tryQuery conn (show $ Query.getPassHash "sayoder") (return . Template.genericResultT))
                                 (\_ -> return $ Template.genericResultT [["something"]])
         )
     ok $ toResponse results
 
--- |Attempt to run a SQL query given a 'DBConn', a query function, and a
--- function to run on success. The success function uses the results of the
--- query to construct an HTML fragment. On failure, uses 'Template.errBoxT' to
--- display an error on the frontend.
-
-tryQuery :: DBConn -> (DBConn -> IO a) -> (a -> IO Html) -> IO Html
+-- |Attempt to run a SQL query given a 'DBConn', a query function from 'Query',
+-- and a function to run on success. The success function uses the results of
+-- the query to construct an HTML fragment. On failure, uses 'Template.errBoxT'
+-- to display an error on the frontend.
+tryQuery :: DBConn -> (DBConn -> IO (Either String a)) -> (a -> IO Html) -> IO Html
 tryQuery conn queryF successAction = do
-    eitherErrResults <- catches
-                            (Right <$> queryF conn)
-                            (E.sqlErrorHandlers ++ [E.handleReadFileException])
+    eitherErrResults <- queryF conn
     case eitherErrResults of
         Left err        -> return $ Template.errBoxT err
         Right results   -> successAction results
@@ -106,13 +101,15 @@ login eitherconn = msum [ method [GET,HEAD] >> ok (toResponse Template.loginPage
 --             )
 
 {-- The homepage is really just a sandbox for now. --}
+
 homePage :: EDBConn -> ServerPart Response
-homePage eitherConn = do
-    toInsert <- liftIO $ withConnErrBox eitherConn
-        (\conn -> do
-            exists <- Query.checkDBExists conn
-            if exists
-            then return $ Template.genericResultT [["something"]]
-            else return Template.createDBButtonT
-        )
-    ok . toResponse $ Template.homePageT toInsert
+homePage eitherConn =
+      liftIO ( withConnErrBox eitherConn
+                    (\conn ->
+                        tryQuery conn Query.checkDBExists (\exists ->
+                            if exists
+                            then return $ Template.genericResultT [["something"]]
+                            else return Template.createDBButtonT
+                                                          )
+                    )
+      ) >>= (ok . toResponse . Template.homePageT)

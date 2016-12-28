@@ -20,12 +20,10 @@ storeUser username pass conn = do
     case hashed of
         Nothing -> return $ Left "Password could not be hashed."
         --TODO maybe move tryQuery to Query so that I don't have to do this.
-        Just hashedPass -> handles sqlErrorHandlers (Right <$> Query.insertUser username hashedPass conn)
+        Just hashedPass -> Query.insertUser username hashedPass conn
 
 --Use Bcrypte to determine if the password for the given username is correct.
 isCorrectPass :: String -> String -> DBConn -> IO (Either String Bool)
 isCorrectPass username pass conn = do
-    hash <- handles (sqlErrorHandlers ++ [handleErrorCall]) (Right <$> Query.getPassHash username conn)
-    if null hash
-    then return $ Left "No results found" --TODO like, this should probably happen elsewhere
-    else return $ hash >>= (\h -> Right $ validatePassword (head h) (pack pass))
+    hash <- Query.getPassHash username conn
+    return $ hash >>= (\h -> Right $ validatePassword h (pack pass))
