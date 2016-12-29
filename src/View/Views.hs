@@ -74,9 +74,12 @@ tryQuery conn queryF successAction = do
 
 
 login :: EDBConn -> ServerPart Response
-login eitherconn = msum [ method [GET,HEAD] >> ok (toResponse Template.loginPageT)
---                      , method POST >> doLogin
+login eitherConn = msum [ method [GET,HEAD] >> (ok . toResponse $ Template.loginPageT Nothing)
+                        , method POST >> loginPost eitherConn
                         ]
+
+loginPost :: EDBConn -> ServerPart Response
+loginPost eitherConn = ok . toResponse $ Template.loginPageT (Just $ Template.errBoxT "Shit! Forgot to implement login.")
 
 --testCreateAccount :: String -> String -> IO ()
 --testCreateAccount username pass =
