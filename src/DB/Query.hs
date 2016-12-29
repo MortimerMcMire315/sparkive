@@ -21,10 +21,8 @@ checkDBExists (PostgresConn _ c)  = PG.checkDBExists c
 checkDBExists (AcidStateConn _ a) = return $ Right True --Because like, the tables are /in the code/, man.
 
 createDB :: String -> DBConn -> IO (Either String ())
-createDB u c =
-    case c of
-        (PostgresConn _ pgc) -> PG.createDB u pgc
-        (AcidStateConn _ a)  -> return $ Right () --See above
+createDB u (PostgresConn _ pgc) = PG.createDB u pgc
+createDB u (AcidStateConn _ a) = return $ Right () --See above
 
 insertUser :: String -> ByteString -> DBConn -> IO (Either String ())
 insertUser username passHash (PostgresConn _ c)  = PG.insertUser username passHash c
@@ -33,3 +31,4 @@ insertUser username passHash (AcidStateConn _ a) = AS.insertUserQ username passH
 getPassHash :: String -> DBConn -> IO (Either String ByteString)
 getPassHash username (PostgresConn _ c)  = PG.getPassHash username c
 getPassHash username (AcidStateConn _ a) = AS.getPassHashQ username a
+

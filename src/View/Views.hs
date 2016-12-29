@@ -13,14 +13,12 @@ module View.Views
 import Happstack.Server
 
 import Control.Monad (msum)
-import Control.Monad.Catch (catches)
 import Control.Monad.IO.Class (liftIO)
 import Text.Hamlet (Html)
 
 import DB.Types (DBConn)
 import qualified DB.Conn as DB
 import qualified DB.Query as Query
-import qualified Exception.Handler as E
 import qualified View.Template as Template
 import qualified Auth.Login as Login
 import View.ContentTypes (MIMEType(CSS, JS, HTML), toResMime)
