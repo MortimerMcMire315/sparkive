@@ -4,7 +4,7 @@ Sparkive
 Simple, elegant digital library management
 ------------------------------------------
 
-*Sparkive*, currently in early development, will be a platform for managing and
+**Sparkive**, currently in early development, will be a platform for managing and
 describing large collections of information. The software will allow users to
 easily manage digital libraries and place them online for public or protected
 browsing through a customizable interface.
