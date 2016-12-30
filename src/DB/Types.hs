@@ -3,16 +3,16 @@ module DB.Types ( PostgresAuth(..)
                 , DBConn(..)
                 ) where
 
-import Database.PostgreSQL.Simple (Connection)
-import Data.Acid (AcidState)
+import Database.PostgreSQL.Simple ( Connection  )
+import Data.Acid                  ( AcidState   )
 
-import DB.AcidStateBackend (Archive)
+import DB.AcidStateBackend        ( Archive     )
 
 data PostgresAuth = PostgresAuth { host   :: String
                                  , user   :: String
                                  , pass   :: String
                                  , port   :: String
-                                 , dbname :: String} deriving Show
+                                 , dbname :: String } deriving Show
 
 data DBInfo = AcidStateInfo { dir :: FilePath} | PostgresInfo PostgresAuth
 

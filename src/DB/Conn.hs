@@ -4,19 +4,25 @@ module DB.Conn
     ( getConn
     ) where
 
-import Database.PostgreSQL.Simple
-import Data.Acid (openLocalStateFrom)
-import Control.Monad.IO.Class (liftIO)
-import Control.Monad (join)
-import Control.Monad.Catch (handleIOError, throwM, catches)
-import GHC.Word (Word16)
-import Text.Read (readMaybe)
-import Data.Default (def)
+import Control.Monad              ( join                )
+import Control.Monad.Catch        ( handleIOError
+                                  , throwM
+                                  , catches             )
+import Control.Monad.IO.Class     ( liftIO              )
+import Data.Acid                  ( openLocalStateFrom  )
+import Data.Default               ( def                 )
+import Database.PostgreSQL.Simple ( Connection
+                                  , ConnectInfo(..)
+                                  , connect             )
+import GHC.Word                   ( Word16              )
+import Text.Read                  ( readMaybe           )
 
+import DB.Types ( DBInfo(..)
+                , PostgresAuth(..)
+                , DBConn(..) )
+import DB.AcidStateBackend ( Archive )
 import qualified Exception.Handler as E
 import qualified Config
-import DB.Types
-import DB.AcidStateBackend (Archive)
 
 -- |Given a string, check if it represents a valid port number.
 checkPort :: String -> Maybe Word16

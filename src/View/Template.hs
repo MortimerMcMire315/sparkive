@@ -1,13 +1,19 @@
 {-# LANGUAGE TemplateHaskell #-}
 module View.Template where
 
-import Happstack.Server
-import Text.Hamlet (shamletFile, Html)
-import Text.Lucius (luciusFile, renderCss, Css)
-import Text.Julius (juliusFile, renderJavascriptUrl, Javascript)
-import Text.Blaze.Html (preEscapedToHtml)
+import Text.Hamlet       ( shamletFile
+                         , Html              )
+import Text.Lucius       ( luciusFile
+                         , renderCss
+                         , Css               )
+import Text.Julius       ( juliusFile
+                         , renderJavascriptUrl
+                         , Javascript        )
+import Text.Blaze.Html   ( preEscapedToHtml  )
 
-import View.TemplateUtil (hamFile, cssFile, jsFile)
+import View.TemplateUtil ( hamFile
+                         , cssFile
+                         , jsFile            )
 
 -- |styles.css, the main stylesheet for the site.
 mainStyleSheet = renderCss $ $(luciusFile (cssFile "styles")) undefined

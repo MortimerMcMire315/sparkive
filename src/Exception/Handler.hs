@@ -21,10 +21,16 @@ module Exception.Handler
     , sqlErrorHandlers
     ) where
 
-import Data.Typeable.Internal (Typeable)
-import Control.Exception (Exception, ErrorCall(..))
-import Control.Monad.Catch (Handler (..), MonadCatch, MonadThrow)
-import Database.PostgreSQL.Simple (SqlError(..), ResultError(..), QueryError(..), FormatError(..))
+import Data.Typeable.Internal     ( Typeable         )
+import Control.Exception          ( Exception
+                                  , ErrorCall(..)    )
+import Control.Monad.Catch        ( Handler (..)
+                                  , MonadCatch
+                                  , MonadThrow       )
+import Database.PostgreSQL.Simple ( SqlError(..)
+                                  , ResultError(..)
+                                  , QueryError(..)
+                                  , FormatError(..)  )
 
 import Exception.TH
 

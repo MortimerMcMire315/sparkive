@@ -10,18 +10,29 @@ module View.Views
     , login
     ) where
 
-import Happstack.Server
+import Happstack.Server       ( method
+                              , notFound
+                              , nullDir
+                              , ok
+                              , path
+                              , toResponse
+                              , ServerPart
+                              , Response
+                              , Method ( GET
+                                       , HEAD
+                                       , POST ) )
 
-import Control.Monad (msum)
-import Control.Monad.IO.Class (liftIO)
-import Text.Hamlet (Html)
+import Control.Monad          ( msum    )
+import Control.Monad.IO.Class ( liftIO  )
+import Text.Hamlet            ( Html    )
 
-import DB.Types (DBConn)
+import DB.Types ( DBConn )
 import qualified DB.Conn as DB
 import qualified DB.Query as Query
 import qualified View.Template as Template
 import qualified Auth.Login as Login
-import View.ContentTypes (MIMEType(CSS, JS, HTML), toResMime)
+import View.ContentTypes ( MIMEType(CSS, JS, HTML)
+                         , toResMime )
 
 type EDBConn = Either String DBConn
 

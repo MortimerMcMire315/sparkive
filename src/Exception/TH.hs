@@ -2,11 +2,11 @@ module Exception.TH
      ( buildErrorHandler
      ) where
 
-import Language.Haskell.TH.Syntax
-import Language.Haskell.TH.Quote (quoteDec)
-import Data.Maybe (fromJust)
-import Data.Typeable.Internal (Typeable)
-import Control.Exception (Exception)
+import Language.Haskell.TH.Syntax --Pretty much every function call comes from here.
+import Language.Haskell.TH.Quote ( quoteDec   )
+import Data.Maybe                ( fromJust   )
+import Data.Typeable.Internal    ( Typeable   )
+import Control.Exception         ( Exception  )
 
 {-|
    Given a name, i.e. ConfigParseException,

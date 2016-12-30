@@ -3,9 +3,9 @@ module Routes
     ) where
 
 import Happstack.Server
-import Control.Monad (msum)
+import Control.Monad ( msum )
 
-import DB.Types (DBConn)
+import DB.Types ( DBConn )
 import qualified View.Views as Views
 
 myPolicy :: BodyPolicy

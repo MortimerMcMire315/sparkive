@@ -8,19 +8,27 @@ module DB.AcidStateBackend ( insertUserQ
                            , Archive
                            ) where
 
-import Control.Exception (throw)
-import Control.Monad.Catch (throwM)
-import Control.Monad.Reader (ask)
-import Control.Monad.State (get, put)
-import Data.Acid
-import Data.ByteString (ByteString)
-import Data.ByteString.Char8 (pack)
-import Data.Default (Default, def)
+import Control.Exception     ( throw           )
+import Control.Monad.Catch   ( throwM          )
+import Control.Monad.Reader  ( ask             )
+import Control.Monad.State   ( get, put        )
+import Data.Acid             ( AcidState
+                             , Update
+                             , Query
+                             , update
+                             , query
+                             , makeAcidic      )
+import Data.ByteString       ( ByteString      )
+import Data.ByteString.Char8 ( pack            )
+import Data.Default          ( Default
+                             , def             )
+import Data.SafeCopy         ( base
+                             , deriveSafeCopy  )
+
 import qualified Data.Map.Lazy as M
-import Data.SafeCopy (base, deriveSafeCopy)
 
 import qualified Exception.Handler as E
-import Exception.Util (handles)
+import Exception.Util ( handles )
 
 data User = User { username   :: String
                  , hashedPass :: ByteString
@@ -74,7 +82,7 @@ $(makeAcidic ''Archive ['insertUser, 'getUserByName])
 {--- ACTUAL QUERIES ---}
 insertUserQ :: String -> ByteString -> AcidState Archive -> IO (Either String ())
 insertUserQ u passHash a = handles [E.handleUsernameTakenException] $
-    fmap Right . update a $ InsertUser $ (User u passHash (pack ""))
+    fmap Right . update a $ InsertUser $ User u passHash (pack "")
 
 getPassHashQ :: String -> AcidState Archive -> IO (Either String ByteString)
 getPassHashQ u a = do

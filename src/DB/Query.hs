@@ -6,9 +6,10 @@ module DB.Query
     , getPassHash
     ) where
 
-import Data.ByteString (ByteString)
-import Data.Acid (query, update)
-import Control.Monad (void)
+import Data.ByteString ( ByteString  )
+import Data.Acid       ( query
+                       , update      )
+import Control.Monad   ( void        )
 
 import qualified DB.PostgresBackend as PG
 import qualified DB.AcidStateBackend as AS

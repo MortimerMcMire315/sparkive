@@ -3,14 +3,21 @@
 module Config ( parseConfig
               ) where
 
-import Data.ConfigFile
-import Control.Monad.IO.Class (liftIO)
-import Control.Monad.Except (runExceptT)
-import Control.Monad.Catch (throwM, MonadThrow)
-import Control.Monad (join)
+import Data.ConfigFile        ( readfile
+                              , get
+                              , emptyCP
+                              , CPError(..)
+                              , CPErrorData(..) )
+import Control.Monad.IO.Class ( liftIO          )
+import Control.Monad.Except   ( runExceptT      )
+import Control.Monad.Catch    ( throwM
+                              , MonadThrow      )
+import Control.Monad          ( join            )
 
 import qualified Exception.Handler as E
-import DB.Types
+import DB.Types ( DBInfo(..)
+                , PostgresAuth(..)
+                , DBConn(..))
 
 -- |Attempt to parse the configuration file located in conf/sparkive.conf.
 parseConfig' :: IO (Either CPError DBInfo)

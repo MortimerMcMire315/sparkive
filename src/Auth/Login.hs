@@ -1,13 +1,18 @@
 module Auth.Login where
 
-import Crypto.BCrypt
-import Data.ByteString.Char8 (ByteString,pack)
-import Database.PostgreSQL.Simple (Connection)
+import Crypto.BCrypt               ( hashPasswordUsingPolicy
+                                   , slowerBcryptHashingPolicy
+                                   , validatePassword          )
+import Data.ByteString.Char8       ( ByteString
+                                   , pack                      )
+import Database.PostgreSQL.Simple  ( Connection                )
+
+import DB.Types                    ( DBConn                    )
+import Exception.Handler           ( sqlErrorHandlers
+                                   , handleErrorCall           )
+import Exception.Util              ( handles                   )
 
 import qualified DB.Query as Query
-import DB.Types
-import Exception.Handler (sqlErrorHandlers, handleErrorCall)
-import Exception.Util (handles)
 
 hashPass :: String -> IO (Maybe ByteString)
 hashPass p = hashPasswordUsingPolicy slowerBcryptHashingPolicy (pack p)

@@ -2,16 +2,24 @@
 
 module DB.PostgresBackend where
 
-import Control.Monad (void)
-import Control.Monad.Catch (catches, catch, throwM)
-import Data.ByteString (ByteString)
-import Data.String.Utils (replace)
-import Database.PostgreSQL.Simple
-import GHC.Int (Int64)
-import System.IO.Error (IOError)
+import Control.Monad              ( void        )
+import Control.Monad.Catch        ( catches
+                                  , catch
+                                  , throwM      )
+import Data.ByteString            ( ByteString  )
+import Data.String.Utils          ( replace     )
+import Database.PostgreSQL.Simple ( query_
+                                  , query
+                                  , execute_
+                                  , execute
+                                  , Connection
+                                  , Query
+                                  , Only(..)    )
+import GHC.Int                    ( Int64       )
+import System.IO.Error            ( IOError     )
 
 import qualified Exception.Handler as E
-import Exception.Util (handles)
+import Exception.Util ( handles )
 
 -- |Attempt to select from the "attribute" table in the Sparkive database.
 --  If the selection fails, we say that the database does not exist or has
@@ -64,7 +72,7 @@ insertUser username pass conn =
 getPassHash :: String -> Connection -> IO (Either String ByteString)
 getPassHash username conn = do
     res <- tryQuery (map fromOnly)
-                    (query conn "SELECT pass FROM sparkive_user WHERE username = ?" 
+                    (query conn "SELECT pass FROM sparkive_user WHERE username = ?"
                         (Only username) :: IO [Only ByteString]
                     )
     return $ case res of
