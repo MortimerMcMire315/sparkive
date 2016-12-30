@@ -7,6 +7,7 @@ import Control.Monad ( msum )
 
 import DB.Types ( DBConn )
 import qualified View.Views as Views
+import qualified View.LoginView as Login
 
 myPolicy :: BodyPolicy
 myPolicy = defaultBodyPolicy "/tmp/" 0 1000 1000
@@ -21,7 +22,7 @@ routes conn = do
            dir  "css"                   Views.serveCSS
          , dir  "js"                    Views.serveJS
          , dirs "ajax/create-db"        (Views.createDBButton conn)
-         , dir  "login"                 (Views.login conn)
+         , dir  "login"                 (Login.login conn)
          , nullDir                   >> Views.homePage conn
          ]
 

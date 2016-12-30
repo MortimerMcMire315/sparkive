@@ -1,6 +1,15 @@
 $doctype 5
 <div #main-page-banner>
-    <div main-page-container>
-        <h1 #title>
-            <a href="/">SPARKIVE
-        <p>A simple, elegant digital library
+    <a href="/">
+        <div #title>
+            <div #sparkive-heading>
+                SPARKIVE
+            <div #sparkive-colon>
+                :
+            <div #sparkive-subheading>
+                A simple, elegant digital library
+<div #silly-blue-line>
+<div #navbar>
+    <div #navbar-item-container>
+        <div .navbar-item>
+            <a href="/login">Login

@@ -21,7 +21,9 @@ library
   other-modules:       View.Template
                      , View.TemplateUtil
                      , View.ContentTypes
+                     , View.LoginView
                      , View.Views
+                     , View.Util
                      , Auth.Login
                      , Exception.Handler
                      , Exception.TH

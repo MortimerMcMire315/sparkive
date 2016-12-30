@@ -2,7 +2,7 @@
     ^{headerT}
         <body>
             ^{mainPageBannerT}
-            <a href="/login">Login
-            <!--^{toDisplay}-->
-            <script src="/js/create-db-button.js">
-            ^{footerT}
+            <div .main-page-container>
+                <!--^{toDisplay}-->
+                <script src="/js/create-db-button.js">
+                ^{footerT}

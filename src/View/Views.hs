@@ -10,45 +10,26 @@ module View.Views
     , login
     ) where
 
-import Happstack.Server       ( method
-                              , notFound
-                              , nullDir
+import Happstack.Server       ( notFound
                               , ok
                               , path
                               , toResponse
                               , ServerPart
-                              , Response
-                              , Method ( GET
-                                       , HEAD
-                                       , POST ) )
+                              , Response )
 
-import Control.Monad          ( msum    )
 import Control.Monad.IO.Class ( liftIO  )
 import Text.Hamlet            ( Html    )
 
-import DB.Types ( DBConn )
-import qualified DB.Conn as DB
+import View.ContentTypes ( MIMEType(CSS, JS, HTML) )
+import View.Util         ( nullDirServe
+                         , tryQuery
+                         , withConn
+                         , withConnErrBox
+                         , EDBConn                 )
+import View.LoginView    ( login                   )
 import qualified DB.Query as Query
 import qualified View.Template as Template
 import qualified Auth.Login as Login
-import View.ContentTypes ( MIMEType(CSS, JS, HTML)
-                         , toResMime )
-
-type EDBConn = Either String DBConn
-
--- Make sure the request is sane (no path segments after *.css or *.js or
--- whatever); if so, serve the file with MIME type "text/css"
---nullDirServe :: ServerPart Response
-nullDirServe template mimeT = nullDir >> ok (toResMime template mimeT)
-
-withConn :: EDBConn -> (String -> IO a) -> (DBConn -> IO a) -> IO a
-withConn eitherConn failAction successAction =
-    case eitherConn of
-        Left err -> failAction err
-        Right conn -> successAction conn
-
-withConnErrBox :: EDBConn -> (DBConn -> IO Html) -> IO Html
-withConnErrBox eitherConn = withConn eitherConn (return . Template.errBoxT)
 
 -- |Serve a CSS file.
 serveCSS :: ServerPart Response
@@ -71,48 +52,6 @@ createDBButton eitherConn = do
                                 (\_ -> return $ Template.genericResultT [["something"]])
         )
     ok $ toResponse results
-
--- |Attempt to run a SQL query given a 'DBConn', a query function from 'Query',
--- and a function to run on success. The success function uses the results of
--- the query to construct an HTML fragment. On failure, uses 'Template.errBoxT'
--- to display an error on the frontend.
-tryQuery :: DBConn -> (DBConn -> IO (Either String a)) -> (a -> IO Html) -> IO Html
-tryQuery conn queryF successAction = do
-    eitherErrResults <- queryF conn
-    case eitherErrResults of
-        Left err        -> return $ Template.errBoxT err
-        Right results   -> successAction results
-
-
-login :: EDBConn -> ServerPart Response
-login eitherConn = msum [ method [GET,HEAD] >> (ok . toResponse $ Template.loginPageT Nothing)
-                        , method POST >> loginPost eitherConn
-                        ]
-
-loginPost :: EDBConn -> ServerPart Response
-loginPost eitherConn = ok . toResponse $ Template.loginPageT (Just $ Template.errBoxT "Shit! Forgot to implement login.")
-
---testCreateAccount :: String -> String -> IO ()
---testCreateAccount username pass =
---    withConn print
---             (\conn -> do
---                 res <- Login.storeUser username pass conn
---                 case res of
---                     Left err -> print err
---                     Right _ -> putStrLn "Success!"
---             )
---
---testCheckPass :: String -> String -> IO ()
---testCheckPass username pass =
---    withConn print
---             (\conn -> do
---                 res <- Login.isCorrectPass username pass conn
---                 case res of
---                    Left err -> print err
---                    Right collision -> print collision
---             )
-
-{-- The homepage is really just a sandbox for now. --}
 
 homePage :: EDBConn -> ServerPart Response
 homePage eitherConn =

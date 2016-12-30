@@ -10,38 +10,112 @@
 
 body {
     margin: 0px;
-	background-color: #9a005d;
-	font-family: 'Helvetica', sans-serif;
+    font-family: 'Lato', sans-serif;
+    background-color: #f2f2f2;
 }
 
+/*
 a {
 	text-decoration: none;
 	font-weight: bold;
-	color: #250A87
+	color: #250A87;
 }
+*/
 
 #main-page-banner {
+    position: relative;
+    background-color: #4b148c;
+    z-index: 3;
+    width: 100%;
+    overflow: hidden;
+}
+
+#main-page-banner a {
+	text-decoration: none;
+    color: #f2f2f2;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    padding-top: 0px;
+    padding-bottom: 0px;
+    overflow: hidden;
+}
+
+#main-page-banner #title {
+    margin-left: 50px;
+    width: 50%;
+    overflow: hidden;
+}
+
+#main-page-banner #sparkive-heading {
     font-family: 'Poppins', sans-serif;
-    text-align: center;
-    background-color: #520583;
-    margin-bottom: 50px;
+    position: relative;
+    font-size: 50px;
+    float: left;
+}
+
+#main-page-banner #sparkive-colon {
+    font-family: 'Poppins', sans-serif;
+    position: relative;
+	padding-top: 5px;
+	padding-left: 7px;
+    font-size: 40px;
+    float: left;
+}
+
+#main-page-banner #sparkive-subheading {
+    font-family: 'Lato', sans-serif;
+    position: relative;
+    font-size: 16px;
+    padding-top: 30px;
+	padding-left: 10px;
+    float: left;
+}
+
+/*Goes right under the main banner*/
+#silly-blue-line {
+    position: relative;
 	-webkit-box-shadow: 0px -8px 30px 0px rgba(0,0,0,1);
 	-moz-box-shadow: 0px -8px 30px 0px rgba(0,0,0,1);
 	box-shadow: 0px -8px 30px 0px rgba(0,0,0,1);
-	
+    z-index: 2;
+    width: 100%;
+    height: 10px;
+	background-color: #8d0981;
 }
 
-#main-page-banner h1 {
-    font-size: 30px;
+#navbar {
+    position: relative;
+    background-color: #211d90;
+    width:100%;
+    height:38px;
+	line-height:38px;
+	-webkit-box-shadow: 0px -3px 30px 0px rgba(0,0,0,1);
+	-moz-box-shadow: 0px -3px 30px 0px rgba(0,0,0,1);
+	box-shadow: 0px -3px 30px 0px rgba(0,0,0,1);
+    z-index: 1;
 }
 
-#main-page-banner a, #main-page-banner p {
+div#navbar-item-container {
+	margin-left: 50px;
+	overflow: hidden;
+}
+
+div.navbar-item {
+	padding-left: 
+	text-align: center;
+	float: left;
+}
+
+.navbar-item a {
 	text-decoration: none;
-    color: #f2f2f2;
+	color: #f2f2f2;
+	font-weight: bold;
 }
 
 .main-page-container {
+    position: relative;
 	padding: 50px;
+    z-index: 0;
 }
 
 .err-box {
