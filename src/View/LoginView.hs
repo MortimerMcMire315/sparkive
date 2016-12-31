@@ -34,7 +34,7 @@ loginPost :: EDBConn -> SessionServerPart Response
 loginPost eitherConn = do
     uname <- look "username"
     pass <- look "password"
-    loginResults <- doLogin eitherConn uname pass 
+    loginResults <- doLogin eitherConn uname pass
     case loginResults of
         Left err  -> ok . toResponse $ T.loginPageT (Just $ T.errBoxT err)
         Right str -> ok . toResponse $ T.loginPageT (Just $ T.errBoxT (show str))
@@ -43,7 +43,7 @@ doLogin :: EDBConn -> String -> String -> SessionServerPart (Either String ByteS
 doLogin eitherConn uname pass = liftIO $
         withConn eitherConn
                  (return . Left)
-                 (\conn -> tryLogin uname pass conn)
+                 (tryLogin uname pass)
 
 tryLogin :: String -> String -> DBConn ->  IO (Either String ByteString)
 tryLogin uname pass conn = do
@@ -61,4 +61,4 @@ passCheck uname pass conn = do
         Left err -> return $ Left err
         Right correct -> if correct
                          then Right <$> getRandomToken
-                         else return . Left $ "Incorrect password."
+                         else return . Left $ "Incorrect password " ++ pass

@@ -75,9 +75,26 @@ getPassHash username conn = do
                     (query conn "SELECT pass FROM sparkive_user WHERE username = ?"
                         (Only username) :: IO [Only ByteString]
                     )
-    return $ case res of
-                Left err -> Left err
-                Right bss -> if length bss /= 1
-                             then Left errStr
-                             else Right $ head bss
+    return $ res >>=
+      (\bss ->
+        if length bss /= 1
+        then Left errStr
+        else Right $ head bss
+      )
  where errStr = "User " ++ username ++ "'s passhash count does not equal 1."
+
+checkUserExists :: String -> Connection -> IO (Either String Bool)
+checkUserExists username conn = do
+    res <- tryQuery (map fromOnly)
+                    (query conn "SELECT * FROM sparkive_user WHERE username = ?"
+                        (Only username)
+                        :: IO [Only ByteString]
+                    )
+    return $ res >>=
+      (\bss ->
+        if length bss >= 1
+        then Left $ "Error: More than one user with username \"" ++ username ++ "\" found in database."
+        else if null bss
+             then Right False
+             else Right True
+      )

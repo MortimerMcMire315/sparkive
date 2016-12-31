@@ -24,7 +24,7 @@ checkDBExists (AcidStateConn _ a) = return $ Right True --Because like, the tabl
 
 createDB :: String -> DBConn -> IO (Either String ())
 createDB u (PostgresConn _ pgc) = PG.createDB u pgc
-createDB u (AcidStateConn _ a) = return $ Right () --See above
+createDB u (AcidStateConn _ a)  = return $ Right () --See above
 
 insertUser :: String -> ByteString -> DBConn -> IO (Either String ())
 insertUser username passHash (PostgresConn _ c)  = PG.insertUser username passHash c
@@ -36,4 +36,4 @@ getPassHash username (AcidStateConn _ a) = AS.getPassHashQ username a
 
 checkUserExists :: String -> DBConn -> IO (Either String Bool)
 checkUserExists username (AcidStateConn _ a) = AS.checkUserExistsQ username a
-checkUserExists username _ = return $ Left "query not implemented for Postgres backend"
+checkUserExists username (PostgresConn _ c)  = PG.checkUserExists username c

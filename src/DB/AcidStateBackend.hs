@@ -8,22 +8,22 @@ module DB.AcidStateBackend ( insertUserQ
                            , Archive
                            ) where
 
-import Control.Exception     ( throw           )
-import Control.Monad.Catch   ( throwM          )
-import Control.Monad.Reader  ( ask             )
-import Control.Monad.State   ( get, put        )
+import Control.Exception     ( throw          )
+import Control.Monad.Catch   ( throwM         )
+import Control.Monad.Reader  ( ask            )
+import Control.Monad.State   ( get, put       )
 import Data.Acid             ( AcidState
                              , Update
                              , Query
                              , update
                              , query
-                             , makeAcidic      )
-import Data.ByteString       ( ByteString      )
-import Data.ByteString.Char8 ( pack            )
+                             , makeAcidic     )
+import Data.ByteString       ( ByteString     )
+import Data.ByteString.Char8 ( pack           )
 import Data.Default          ( Default
-                             , def             )
+                             , def            )
 import Data.SafeCopy         ( base
-                             , deriveSafeCopy  )
+                             , deriveSafeCopy )
 
 import qualified Data.Map.Lazy as M
 

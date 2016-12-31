@@ -5,7 +5,7 @@ $doctype 5
             <div #sparkive-heading>
                 SPARKIVE
             <div #sparkive-colon>
-                :
+                ::
             <div #sparkive-subheading>
                 A simple, elegant digital library
 <div #silly-blue-line>
