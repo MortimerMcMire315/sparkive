@@ -15,37 +15,39 @@ import Happstack.Server       ( notFound
                               , path
                               , toResponse
                               , ServerPart
+                              , ServerPartT
                               , Response )
 
-import Control.Monad.IO.Class ( liftIO  )
-import Text.Hamlet            ( Html    )
+import Control.Monad.IO.Class    ( liftIO  )
+import Control.Monad.Trans.Class ( lift    )
+import Text.Hamlet               ( Html    )
 
+import Auth.Session      ( SessionServerPart
+                         , getToken                )
 import View.ContentTypes ( MIMEType(CSS, JS, HTML) )
 import View.Util         ( nullDirServe
-                         , tryQuery
-                         , withConn
-                         , withConnErrBox
-                         , EDBConn                 )
+                         , tryQuery, withConn
+                         , withConnErrBox, EDBConn )
 import View.LoginView    ( login                   )
 import qualified DB.Query as Query
 import qualified View.Template as Template
 import qualified Auth.Login as Login
 
 -- |Serve a CSS file.
-serveCSS :: ServerPart Response
-serveCSS = path $ \(cssRequest :: String) ->
-             case cssRequest of
-                "styles.css" -> nullDirServe Template.mainStyleSheet CSS
-                _            -> notFound $ toResponse ("CSS stylesheet not found." :: String)
+serveCSS :: SessionServerPart Response
+serveCSS = lift . path $ \(cssRequest :: String) ->
+                         case cssRequest of
+                            "styles.css" -> nullDirServe Template.mainStyleSheet CSS
+                            _            -> notFound $ toResponse ("CSS stylesheet not found." :: String)
 
-serveJS :: ServerPart Response
-serveJS = path $ \(jsRequest :: String) ->
+serveJS :: SessionServerPart Response
+serveJS = lift . path $ \(jsRequest :: String) ->
              case jsRequest of
                 "create-db-button.js" -> nullDirServe Template.createDBButtonJS JS
                 _            -> notFound $ toResponse ("JavaScript file not fouund." :: String)
 
 
-createDBButton :: EDBConn -> ServerPart Response
+createDBButton :: EDBConn -> SessionServerPart Response
 createDBButton eitherConn = do
     results <- liftIO $ withConnErrBox eitherConn
         (\conn -> tryQuery conn (Query.createDB "sparkive")
@@ -53,14 +55,5 @@ createDBButton eitherConn = do
         )
     ok $ toResponse results
 
-homePage :: EDBConn -> ServerPart Response
-homePage eitherConn =
-      liftIO ( withConnErrBox eitherConn
-                    (\conn ->
-                        tryQuery conn Query.checkDBExists (\exists ->
-                            if exists
-                            then return $ Template.genericResultT [["something"]]
-                            else return Template.createDBButtonT
-                                                          )
-                    )
-      ) >>= (ok . toResponse . Template.homePageT)
+homePage :: EDBConn -> SessionServerPart Response
+homePage eitherConn = ok . toResponse . Template.homePageT . Template.errBoxT $ "Everything is bad."

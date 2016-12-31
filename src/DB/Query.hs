@@ -4,6 +4,7 @@ module DB.Query
     , checkDBExists
     , insertUser
     , getPassHash
+    , checkUserExists
     ) where
 
 import Data.ByteString ( ByteString  )
@@ -33,3 +34,6 @@ getPassHash :: String -> DBConn -> IO (Either String ByteString)
 getPassHash username (PostgresConn _ c)  = PG.getPassHash username c
 getPassHash username (AcidStateConn _ a) = AS.getPassHashQ username a
 
+checkUserExists :: String -> DBConn -> IO (Either String Bool)
+checkUserExists username (AcidStateConn _ a) = AS.checkUserExistsQ username a
+checkUserExists username _ = return $ Left "query not implemented for Postgres backend"

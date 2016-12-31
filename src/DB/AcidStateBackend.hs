@@ -3,7 +3,7 @@
 {-# LANGUAGE TypeFamilies #-}
 
 module DB.AcidStateBackend ( insertUserQ
---                         , getUserByNameQ
+                           , checkUserExistsQ
                            , getPassHashQ
                            , Archive
                            ) where
@@ -90,3 +90,10 @@ getPassHashQ u a = do
     return $ case maybeUser of
                 Just theUser -> Right $ hashedPass theUser
                 Nothing -> Left $ "Error: User " ++ u ++ " not found."
+
+checkUserExistsQ :: String -> AcidState Archive -> IO (Either String Bool)
+checkUserExistsQ u a = do
+    maybeUser <- query a $ GetUserByName u
+    return $ case maybeUser of
+                Just theUser -> Right True
+                Nothing      -> Right False

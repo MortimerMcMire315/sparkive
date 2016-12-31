@@ -25,6 +25,7 @@ library
                      , View.Views
                      , View.Util
                      , Auth.Login
+                     , Auth.Session
                      , Exception.Handler
                      , Exception.TH
                      , Exception.Util
@@ -33,6 +34,7 @@ library
                      , DB.Conn
                      , DB.Types
                      , DB.Query
+                     , Util.Random
                      , Routes
                      , Config
 
@@ -45,10 +47,12 @@ library
                      , containers >= 0.5
                      , data-default >= 0.7
                      , exceptions >= 0.8 && < 0.9
-                     , happstack-server >= 7 && < 8
+                     , happstack-clientsession >= 7.0
+                     , happstack-server >= 7.0 && < 8.0
                      , MissingH >= 1.4 && < 2.0
                      , mtl >= 2.2 && < 2.3
                      , postgresql-simple >= 0.5 && < 0.6
+                     , random >= 1.0 && < 2.0
                      , safecopy >= 0.9
                      , shakespeare >= 2.0.11 && < 3
                      , split >= 0.2 && < 0.3

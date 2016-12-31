@@ -8,6 +8,7 @@ import Happstack.Server  ( ok
                          , toResponse
                          , nullDir
                          , ServerPart
+                         , ServerPartT
                          , Response
                          , ToMessage  )
 import Text.Hamlet       ( Html       )
@@ -24,7 +25,7 @@ type EDBConn = Either String DBConn
 nullDirServe :: (ToMessage t) => t -> MIMEType -> ServerPart Response
 nullDirServe template mimeT = nullDir >> ok (toResMime template mimeT)
 
-withConn :: EDBConn -> (String -> IO a) -> (DBConn -> IO a) -> IO a
+withConn :: (Monad m) => EDBConn -> (String -> m a) -> (DBConn -> m a) -> m a
 withConn eitherConn failAction successAction =
     case eitherConn of
         Left err -> failAction err

@@ -3,6 +3,6 @@
         <body>
             ^{mainPageBannerT}
             <div .main-page-container>
-                <!--^{toDisplay}-->
+                ^{toDisplay}
                 <script src="/js/create-db-button.js">
                 ^{footerT}
