@@ -47,3 +47,6 @@ loginPageT maybeErr = $(shamletFile $ hamFile "login")
 
 homePageT :: Html -> Html
 homePageT toDisplay = $(shamletFile $ hamFile "home")
+
+adminPanelT :: Html
+adminPanelT = $(shamletFile $ hamFile "admin-panel")

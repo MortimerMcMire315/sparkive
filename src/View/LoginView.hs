@@ -18,6 +18,8 @@ import Happstack.Server       ( ok
 import View.Util    ( EDBConn, withConn )
 import Auth.Session ( SessionServerPart
                     , SessionData
+                    , putToken
+                    , getToken
                     , token             )
 import Auth.Login   ( isCorrectPass     )
 import DB.Query     ( checkUserExists   )
@@ -37,7 +39,7 @@ loginPost eitherConn = do
     loginResults <- doLogin eitherConn uname pass
     case loginResults of
         Left err  -> ok . toResponse $ T.loginPageT (Just $ T.errBoxT err)
-        Right str -> ok . toResponse $ T.loginPageT (Just $ T.errBoxT (show str))
+        Right str -> putToken (Just str) >> (ok . toResponse . T.loginPageT . Just . T.errBoxT $ show str)
 
 doLogin :: EDBConn -> String -> String -> SessionServerPart (Either String ByteString)
 doLogin eitherConn uname pass = liftIO $

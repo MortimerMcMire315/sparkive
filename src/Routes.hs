@@ -22,8 +22,9 @@ routes conn = do
     msum [
            dir  "css"                   Views.serveCSS
          , dir  "js"                    Views.serveJS
-         , dirs "ajax/create-db"        (Views.createDBButton conn)
-         , dir  "login"                 (Login.login conn)
+         , dirs "ajax/create-db"      $ Views.createDBButton conn
+         , dir  "login"               $ Login.login conn
+         , dir  "admin-panel"         $ Views.adminPanel conn
          , nullDir                   >> Views.homePage conn
          ]
 

@@ -3,7 +3,8 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module View.Views
-    ( homePage
+    ( adminPanel
+    , homePage
     , serveCSS
     , serveJS
     , createDBButton
@@ -22,10 +23,10 @@ import Control.Monad.IO.Class    ( liftIO  )
 import Control.Monad.Trans.Class ( lift    )
 import Text.Hamlet               ( Html    )
 
-import Auth.Session      ( SessionServerPart
-                         , getToken                )
+import Auth.Session      ( SessionServerPart       )
 import View.ContentTypes ( MIMEType(CSS, JS, HTML) )
-import View.Util         ( nullDirServe
+import View.Util         ( requireLogin
+                         , nullDirServe
                          , tryQuery, withConn
                          , withConnErrBox, EDBConn )
 import View.LoginView    ( login                   )
@@ -57,3 +58,7 @@ createDBButton eitherConn = do
 
 homePage :: EDBConn -> SessionServerPart Response
 homePage eitherConn = ok . toResponse . Template.homePageT . Template.errBoxT $ "Everything is bad."
+
+adminPanel :: EDBConn -> SessionServerPart Response
+adminPanel eitherConn = requireLogin $
+    ok $ toResponse Template.adminPanelT

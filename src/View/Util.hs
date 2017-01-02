@@ -1,21 +1,26 @@
 module View.Util ( nullDirServe
+                 , requireLogin
                  , tryQuery
                  , withConn
                  , withConnErrBox
                  , EDBConn        ) where
 
-import Happstack.Server  ( ok
-                         , toResponse
-                         , nullDir
-                         , ServerPart
-                         , ServerPartT
-                         , Response
-                         , ToMessage  )
-import Text.Hamlet       ( Html       )
+import Control.Monad.IO.Class ( liftIO )
+import Happstack.Server       ( ok
+                              , toResponse
+                              , nullDir
+                              , askRqEnv
+                              , ServerPart
+                              , ServerPartT
+                              , Response
+                              , ToMessage  )
+import Text.Hamlet            ( Html       )
 
 import View.ContentTypes ( toResMime
-                         , MIMEType   )
-import DB.Types          ( DBConn     )
+                         , MIMEType           )
+import DB.Types          ( DBConn             )
+import Auth.Session      ( getToken
+                         , SessionServerPart  )
 import qualified View.Template as T
 
 type EDBConn = Either String DBConn
@@ -44,3 +49,13 @@ tryQuery conn queryF successAction = do
     case eitherErrResults of
         Left err        -> return $ T.errBoxT err
         Right results   -> successAction results
+
+requireLogin :: SessionServerPart Response -> SessionServerPart Response
+requireLogin action = do
+    maybeToken   <- getToken
+    rqData       <- askRqEnv
+    let needLogin = "You must be logged in to access this page."
+    case maybeToken of
+        Nothing    -> liftIO (print rqData) >> (ok . toResponse $ T.loginPageT (Just $ T.errBoxT needLogin))
+        --TODO actually check the token
+        Just token -> action
