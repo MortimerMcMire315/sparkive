@@ -9,7 +9,8 @@ import Control.Monad.IO.Class ( liftIO )
 import Happstack.Server       ( ok
                               , toResponse
                               , nullDir
-                              , askRqEnv
+                              , askRq
+                              , rqUri
                               , ServerPart
                               , ServerPartT
                               , Response
@@ -20,6 +21,7 @@ import View.ContentTypes ( toResMime
                          , MIMEType           )
 import DB.Types          ( DBConn             )
 import Auth.Session      ( getToken
+                         , putUltDest
                          , SessionServerPart  )
 import qualified View.Template as T
 
@@ -53,9 +55,9 @@ tryQuery conn queryF successAction = do
 requireLogin :: SessionServerPart Response -> SessionServerPart Response
 requireLogin action = do
     maybeToken   <- getToken
-    rqData       <- askRqEnv
+    rqData       <- askRq
     let needLogin = "You must be logged in to access this page."
     case maybeToken of
-        Nothing    -> liftIO (print rqData) >> (ok . toResponse $ T.loginPageT (Just $ T.errBoxT needLogin))
+        Nothing    -> putUltDest (Just $ rqUri rqData) >> (ok . toResponse $ T.loginPageT (Just $ T.errBoxT needLogin))
         --TODO actually check the token
         Just token -> action

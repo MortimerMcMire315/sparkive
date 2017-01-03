@@ -5,9 +5,11 @@ module View.LoginView ( login
 import Control.Monad          ( msum            )
 import Control.Monad.IO.Class ( liftIO          )
 import Data.ByteString        ( ByteString      )
+import Data.Maybe             ( fromMaybe       )
 import Happstack.Server       ( ok
                               , look
                               , toResponse
+                              , seeOther
                               , ServerPart
                               , Response
                               , method
@@ -20,6 +22,7 @@ import Auth.Session ( SessionServerPart
                     , SessionData
                     , putToken
                     , getToken
+                    , getUltDest
                     , token             )
 import Auth.Login   ( isCorrectPass     )
 import DB.Query     ( checkUserExists   )
@@ -39,7 +42,11 @@ loginPost eitherConn = do
     loginResults <- doLogin eitherConn uname pass
     case loginResults of
         Left err  -> ok . toResponse $ T.loginPageT (Just $ T.errBoxT err)
-        Right str -> putToken (Just str) >> (ok . toResponse . T.loginPageT . Just . T.errBoxT $ show str)
+        Right str -> do
+            putToken (Just str)
+            ultDest <- getUltDest
+            let nextUrl = fromMaybe "/" ultDest
+            seeOther nextUrl (toResponse "") --ok . toResponse . T.loginPageT . Just . T.errBoxT $ show str
 
 doLogin :: EDBConn -> String -> String -> SessionServerPart (Either String ByteString)
 doLogin eitherConn uname pass = liftIO $
