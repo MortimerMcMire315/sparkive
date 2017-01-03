@@ -22,7 +22,7 @@ mainStyleSheet = renderCss $ $(luciusFile (cssFile "styles")) undefined
 createDBButtonJS = renderJavascriptUrl (\_ _ -> undefined) $(juliusFile (jsFile "create-db-button"))
 
 -- |The banner that runs across the top of the main page.
-mainPageBannerT = $(shamletFile $ hamFile "mainPageBanner")
+mainPageBannerT = $(shamletFile $ hamFile "main-page-banner")
 
 -- |The <head> section to go on every page.
 headerT         = $(shamletFile $ hamFile "header")
@@ -33,14 +33,14 @@ footerT         = $(shamletFile $ hamFile "footer")
 -- |A red error box that can be displayed to the user if any exception occurs.
 errBoxT :: String -> Html
 errBoxT err = let errStr = preEscapedToHtml err in
-                             $(shamletFile $ hamFile "errBox")
+                             $(shamletFile $ hamFile "err-box")
 
 -- |A <div> displaying generic query results.
 genericResultT :: [[String]] -> Html
-genericResultT results = $(shamletFile $ hamFile "genericResult")
+genericResultT results = $(shamletFile $ hamFile "generic-result")
 
 createDBButtonT :: Html
-createDBButtonT = $(shamletFile $ hamFile "createDBButton")
+createDBButtonT = $(shamletFile $ hamFile "create-db-button")
 
 loginPageT :: Maybe Html -> Html
 loginPageT maybeErr = $(shamletFile $ hamFile "login")

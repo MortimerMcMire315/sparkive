@@ -21,7 +21,7 @@ import View.Util    ( EDBConn, withConn )
 import Auth.Session ( SessionServerPart
                     , SessionData
                     , putToken
-                    , getToken
+                    , putUltDest
                     , getUltDest
                     , token             )
 import Auth.Login   ( isCorrectPass     )
@@ -46,6 +46,8 @@ loginPost eitherConn = do
             putToken (Just str)
             ultDest <- getUltDest
             let nextUrl = fromMaybe "/" ultDest
+            --Clear ultDest so that the user doesn't get unexpectedly redirected
+            putUltDest Nothing
             seeOther nextUrl (toResponse "") --ok . toResponse . T.loginPageT . Just . T.errBoxT $ show str
 
 doLogin :: EDBConn -> String -> String -> SessionServerPart (Either String ByteString)
@@ -69,5 +71,6 @@ passCheck uname pass conn = do
     case eCorrectPass of
         Left err -> return $ Left err
         Right correct -> if correct
+                         --TODO store in database
                          then Right <$> getRandomToken
                          else return . Left $ "Incorrect password " ++ pass

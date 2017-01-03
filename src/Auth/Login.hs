@@ -24,7 +24,6 @@ storeUser username pass conn = do
     hashed <- hashPass pass
     case hashed of
         Nothing -> return $ Left "Password could not be hashed."
-        --TODO maybe move tryQuery to Query so that I don't have to do this.
         Just hashedPass -> Query.insertUser username hashedPass conn
 
 --Use Bcrypte to determine if the password for the given username is correct.
