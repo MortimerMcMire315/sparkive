@@ -63,11 +63,11 @@ getConn = do
        Left err -> return $ Left err
        Right info ->
            case info of
-               PostgresInfo dbauth ->
+               PostgresInfo dbauth -> putStrLn "postgres" >>
                    catches (Right <$> getPostgresConn dbauth)
                            [ E.handleInvalidPortException
                            , E.handleSQLConnectionException ]
-               AcidStateInfo dir ->
+               AcidStateInfo dir -> putStrLn "acid" >>
                    catches (Right <$> getAcidStateConn dir)
                            [ E.handleErrorCall ]
 

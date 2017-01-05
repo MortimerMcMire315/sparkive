@@ -5,6 +5,7 @@
 module DB.AcidStateBackend ( insertUserQ
                            , checkUserExistsQ
                            , getPassHashQ
+                           , getSaltQ
                            , Archive
                            ) where
 
@@ -80,16 +81,22 @@ $(makeAcidic ''Archive ['insertUser, 'getUserByName])
 
 
 {--- ACTUAL QUERIES ---}
-insertUserQ :: String -> ByteString -> AcidState Archive -> IO (Either String ())
-insertUserQ u passHash a = handles [E.handleUsernameTakenException] $
-    fmap Right . update a $ InsertUser $ User u passHash (pack "")
+insertUserQ :: String -> ByteString -> ByteString -> AcidState Archive -> IO (Either String ())
+insertUserQ u passHash salt a = handles [E.handleUsernameTakenException] $
+    fmap Right . update a $ InsertUser $ User u passHash salt
 
-getPassHashQ :: String -> AcidState Archive -> IO (Either String ByteString)
-getPassHashQ u a = do
+getUserAttrQ :: (User -> a) -> String -> AcidState Archive -> IO (Either String a)
+getUserAttrQ f u a = do
     maybeUser <- query a $ GetUserByName u
     return $ case maybeUser of
-                Just theUser -> Right $ hashedPass theUser
+                Just theUser -> Right $ f theUser
                 Nothing -> Left $ "Error: User " ++ u ++ " not found."
+
+getPassHashQ :: String -> AcidState Archive -> IO (Either String ByteString)
+getPassHashQ = getUserAttrQ hashedPass
+
+getSaltQ :: String -> AcidState Archive -> IO (Either String ByteString)
+getSaltQ = getUserAttrQ salt
 
 checkUserExistsQ :: String -> AcidState Archive -> IO (Either String Bool)
 checkUserExistsQ u a = do

@@ -1,4 +1,4 @@
-module Util.Random (getRandomToken, getRandomTokenN) where
+module Util.Random (getRandomToken, getRandomByteString) where
 
 import System.Random   ( randomIO )
 
@@ -7,7 +7,7 @@ import Data.Word       ( Word8 )
 import Data.ByteString ( ByteString, pack )
 
 getRandomToken :: IO ByteString
-getRandomToken = getRandomTokenN 32
+getRandomToken = getRandomByteString 32
 
-getRandomTokenN :: Int -> IO ByteString
-getRandomTokenN n = pack <$> replicateM n (randomIO :: IO Word8)
+getRandomByteString :: Int -> IO ByteString
+getRandomByteString n = pack <$> replicateM n (randomIO :: IO Word8)

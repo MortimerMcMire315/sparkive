@@ -47,7 +47,6 @@ serveJS = lift . path $ \(jsRequest :: String) ->
                 "create-db-button.js" -> nullDirServe Template.createDBButtonJS JS
                 _            -> notFound $ toResponse ("JavaScript file not fouund." :: String)
 
-
 createDBButton :: EDBConn -> SessionServerPart Response
 createDBButton eitherConn = do
     results <- liftIO $ withConnErrBox eitherConn
@@ -57,7 +56,7 @@ createDBButton eitherConn = do
     ok $ toResponse results
 
 homePage :: EDBConn -> SessionServerPart Response
-homePage eitherConn = ok . toResponse . Template.homePageT . Template.errBoxT $ "Everything is bad."
+homePage eitherConn = ok . toResponse $ Template.homePageT Template.createDBButtonT
 
 adminPanel :: EDBConn -> SessionServerPart Response
 adminPanel eitherConn = requireLogin $

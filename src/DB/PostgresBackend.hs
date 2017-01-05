@@ -2,21 +2,21 @@
 
 module DB.PostgresBackend where
 
-import Control.Monad              ( void        )
+import Control.Monad              ( void       )
 import Control.Monad.Catch        ( catches
                                   , catch
-                                  , throwM      )
-import Data.ByteString            ( ByteString  )
-import Data.String.Utils          ( replace     )
+                                  , throwM     )
+import Data.ByteString            ( ByteString )
+import Data.String.Utils          ( replace    )
 import Database.PostgreSQL.Simple ( query_
                                   , query
                                   , execute_
                                   , execute
                                   , Connection
                                   , Query
-                                  , Only(..)    )
-import GHC.Int                    ( Int64       )
-import System.IO.Error            ( IOError     )
+                                  , Only(..)   )
+import GHC.Int                    ( Int64      )
+import System.IO.Error            ( IOError    )
 
 import qualified Exception.Handler as E
 import Exception.Util ( handles )
@@ -64,35 +64,40 @@ createDB user conn = do
     let (q :: Query) = read . show $ replace "%user%" user f
     tryQuery (const ()) $ execute_ conn q
 
-insertUser :: String -> ByteString -> Connection -> IO (Either String ())
-insertUser username pass conn =
+insertUser :: String -> ByteString -> ByteString -> Connection -> IO (Either String ())
+insertUser username pass salt conn =
     tryQuery (const ()) $
-            execute conn "INSERT INTO sparkive_user (username, pass) VALUES (?,?)" (username, pass)
+        execute conn "INSERT INTO sparkive_user (username, pass, salt) VALUES (?,?,?)" (username, pass, salt)
 
-getPassHash :: String -> Connection -> IO (Either String ByteString)
-getPassHash username conn = do
-    res <- tryQuery (map fromOnly)
-                    (query conn "SELECT pass FROM sparkive_user WHERE username = ?"
-                        (Only username) :: IO [Only ByteString]
-                    )
+getUserAttr :: IO [Only ByteString]-> IO (Either String ByteString)
+getUserAttr q = do
+    res <- tryQuery (map fromOnly) q
     return $ res >>=
       (\bss ->
         if length bss /= 1
         then Left errStr
         else Right $ head bss
       )
- where errStr = "User " ++ username ++ "'s passhash count does not equal 1."
+ where errStr = "User has more than one row in the database. Aborting."
+
+getSalt :: String -> Connection -> IO (Either String ByteString)
+getSalt username conn = getUserAttr 
+    (query conn "SELECT salt FROM sparkive_user WHERE username = ?" (Only username))
+
+getPassHash :: String -> Connection -> IO (Either String ByteString)
+getPassHash username conn = getUserAttr 
+    (query conn "SELECT pass FROM sparkive_user WHERE username = ?" (Only username))
 
 checkUserExists :: String -> Connection -> IO (Either String Bool)
 checkUserExists username conn = do
-    res <- tryQuery (map fromOnly)
+    res <- tryQuery id
                     (query conn "SELECT * FROM sparkive_user WHERE username = ?"
-                        (Only username)
-                        :: IO [Only ByteString]
+                                (Only username)
+                                :: IO [(Int, ByteString, ByteString, ByteString)]
                     )
     return $ res >>=
       (\bss ->
-        if length bss >= 1
+        if length bss > 1
         then Left $ "Error: More than one user with username \"" ++ username ++ "\" found in database."
         else if null bss
              then Right False

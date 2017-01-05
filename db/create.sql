@@ -1,10 +1,3 @@
---
--- PostgreSQL database dump
---
-
--- Dumped from database version 9.6.1
--- Dumped by pg_dump version 9.6.1
-
 SET statement_timeout = 0;
 SET lock_timeout = 0;
 SET idle_in_transaction_session_timeout = 0;
@@ -14,29 +7,13 @@ SET check_function_bodies = false;
 SET client_min_messages = warning;
 SET row_security = off;
 
---
--- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: 
---
-
 CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
-
-
---
--- Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner: 
---
 
 COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
 
-
 SET search_path = public, pg_catalog;
-
 SET default_tablespace = '';
-
 SET default_with_oids = false;
-
---
--- Name: attr_values; Type: TABLE; Schema: public; Owner: %user%
---
 
 CREATE TABLE attr_values (
     id integer NOT NULL,
@@ -44,12 +21,7 @@ CREATE TABLE attr_values (
     attr_value text NOT NULL
 );
 
-
 ALTER TABLE attr_values OWNER TO %user%;
-
---
--- Name: attr_values_id_seq; Type: SEQUENCE; Schema: public; Owner: %user%
---
 
 CREATE SEQUENCE attr_values_id_seq
     START WITH 1
@@ -58,19 +30,9 @@ CREATE SEQUENCE attr_values_id_seq
     NO MAXVALUE
     CACHE 1;
 
-
 ALTER TABLE attr_values_id_seq OWNER TO %user%;
 
---
--- Name: attr_values_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: %user%
---
-
 ALTER SEQUENCE attr_values_id_seq OWNED BY attr_values.id;
-
-
---
--- Name: attribute; Type: TABLE; Schema: public; Owner: %user%
---
 
 CREATE TABLE attribute (
     id integer NOT NULL,
@@ -80,9 +42,6 @@ CREATE TABLE attribute (
 
 ALTER TABLE attribute OWNER TO %user%;
 
---
--- Name: attribute_id_seq; Type: SEQUENCE; Schema: public; Owner: %user%
---
 
 CREATE SEQUENCE attribute_id_seq
     START WITH 1
@@ -94,16 +53,10 @@ CREATE SEQUENCE attribute_id_seq
 
 ALTER TABLE attribute_id_seq OWNER TO %user%;
 
---
--- Name: attribute_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: %user%
---
 
 ALTER SEQUENCE attribute_id_seq OWNED BY attribute.id;
 
 
---
--- Name: item; Type: TABLE; Schema: public; Owner: %user%
---
 
 CREATE TABLE item (
     id integer NOT NULL,
@@ -114,9 +67,6 @@ CREATE TABLE item (
 
 ALTER TABLE item OWNER TO %user%;
 
---
--- Name: item_attrs; Type: TABLE; Schema: public; Owner: %user%
---
 
 CREATE TABLE item_attrs (
     id integer NOT NULL,
@@ -127,9 +77,6 @@ CREATE TABLE item_attrs (
 
 ALTER TABLE item_attrs OWNER TO %user%;
 
---
--- Name: item_attrs_id_seq; Type: SEQUENCE; Schema: public; Owner: %user%
---
 
 CREATE SEQUENCE item_attrs_id_seq
     START WITH 1
@@ -141,16 +88,10 @@ CREATE SEQUENCE item_attrs_id_seq
 
 ALTER TABLE item_attrs_id_seq OWNER TO %user%;
 
---
--- Name: item_attrs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: %user%
---
 
 ALTER SEQUENCE item_attrs_id_seq OWNED BY item_attrs.id;
 
 
---
--- Name: item_id_seq; Type: SEQUENCE; Schema: public; Owner: %user%
---
 
 CREATE SEQUENCE item_id_seq
     START WITH 1
@@ -162,29 +103,76 @@ CREATE SEQUENCE item_id_seq
 
 ALTER TABLE item_id_seq OWNER TO %user%;
 
---
--- Name: item_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: %user%
---
 
 ALTER SEQUENCE item_id_seq OWNED BY item.id;
 
 
---
--- Name: sparkive_user; Type: TABLE; Schema: public; Owner: %user%
---
+
+CREATE TABLE sess_token (
+    id integer NOT NULL,
+    username integer NOT NULL,
+    token integer NOT NULL
+);
+
+
+ALTER TABLE sess_token OWNER TO %user%;
+
+
+CREATE SEQUENCE sess_token_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE sess_token_id_seq OWNER TO %user%;
+
+
+ALTER SEQUENCE sess_token_id_seq OWNED BY sess_token.id;
+
+
+
+CREATE SEQUENCE sess_token_token_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE sess_token_token_seq OWNER TO %user%;
+
+
+ALTER SEQUENCE sess_token_token_seq OWNED BY sess_token.token;
+
+
+
+CREATE SEQUENCE sess_token_username_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE sess_token_username_seq OWNER TO %user%;
+
+
+ALTER SEQUENCE sess_token_username_seq OWNED BY sess_token.username;
+
+
 
 CREATE TABLE sparkive_user (
     id integer NOT NULL,
     username text NOT NULL,
-    pass bytea NOT NULL
+    pass bytea NOT NULL,
+    salt bytea NOT NULL
 );
 
 
 ALTER TABLE sparkive_user OWNER TO %user%;
 
---
--- Name: sparkive_user_id_seq; Type: SEQUENCE; Schema: public; Owner: %user%
---
 
 CREATE SEQUENCE sparkive_user_id_seq
     START WITH 1
@@ -196,51 +184,91 @@ CREATE SEQUENCE sparkive_user_id_seq
 
 ALTER TABLE sparkive_user_id_seq OWNER TO %user%;
 
---
--- Name: sparkive_user_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: %user%
---
 
 ALTER SEQUENCE sparkive_user_id_seq OWNED BY sparkive_user.id;
 
 
---
--- Name: attr_values id; Type: DEFAULT; Schema: public; Owner: %user%
---
 
 ALTER TABLE ONLY attr_values ALTER COLUMN id SET DEFAULT nextval('attr_values_id_seq'::regclass);
 
 
---
--- Name: attribute id; Type: DEFAULT; Schema: public; Owner: %user%
---
 
 ALTER TABLE ONLY attribute ALTER COLUMN id SET DEFAULT nextval('attribute_id_seq'::regclass);
 
 
---
--- Name: item id; Type: DEFAULT; Schema: public; Owner: %user%
---
 
 ALTER TABLE ONLY item ALTER COLUMN id SET DEFAULT nextval('item_id_seq'::regclass);
 
 
---
--- Name: item_attrs id; Type: DEFAULT; Schema: public; Owner: %user%
---
 
 ALTER TABLE ONLY item_attrs ALTER COLUMN id SET DEFAULT nextval('item_attrs_id_seq'::regclass);
 
 
---
--- Name: sparkive_user id; Type: DEFAULT; Schema: public; Owner: %user%
---
+
+ALTER TABLE ONLY sess_token ALTER COLUMN id SET DEFAULT nextval('sess_token_id_seq'::regclass);
+
+
+
+ALTER TABLE ONLY sess_token ALTER COLUMN username SET DEFAULT nextval('sess_token_username_seq'::regclass);
+
+
+
+ALTER TABLE ONLY sess_token ALTER COLUMN token SET DEFAULT nextval('sess_token_token_seq'::regclass);
+
+
 
 ALTER TABLE ONLY sparkive_user ALTER COLUMN id SET DEFAULT nextval('sparkive_user_id_seq'::regclass);
 
 
---
--- Data for Name: attr_values; Type: TABLE DATA; Schema: public; Owner: %user%
---
+
+
+
+
+SELECT pg_catalog.setval('attr_values_id_seq', 1, false);
+
+
+
+
+
+
+SELECT pg_catalog.setval('attribute_id_seq', 1, false);
+
+
+
+
+
+
+
+
+
+SELECT pg_catalog.setval('item_attrs_id_seq', 1, false);
+
+
+
+SELECT pg_catalog.setval('item_id_seq', 1, false);
+
+
+
+
+
+
+SELECT pg_catalog.setval('sess_token_id_seq', 1, false);
+
+
+
+SELECT pg_catalog.setval('sess_token_token_seq', 1, false);
+
+
+
+SELECT pg_catalog.setval('sess_token_username_seq', 1, false);
+
+
+
+
+
+
+SELECT pg_catalog.setval('sparkive_user_id_seq', 1, false);
+
 
 INSERT INTO attr_values VALUES (1, 1, 'Leo Tolstoy');
 INSERT INTO attr_values VALUES (2, 1, 'David Foster Wallace');
@@ -248,42 +276,13 @@ INSERT INTO attr_values VALUES (3, 1, 'Octavia Butler');
 INSERT INTO attr_values VALUES (4, 2, 'Science Fiction');
 INSERT INTO attr_values VALUES (5, 2, 'Historical Fiction');
 
-
---
--- Name: attr_values_id_seq; Type: SEQUENCE SET; Schema: public; Owner: %user%
---
-
-SELECT pg_catalog.setval('attr_values_id_seq', 5, true);
-
-
---
--- Data for Name: attribute; Type: TABLE DATA; Schema: public; Owner: %user%
---
-
 INSERT INTO attribute VALUES (1, 'Author');
 INSERT INTO attribute VALUES (2, 'Genre');
-
-
---
--- Name: attribute_id_seq; Type: SEQUENCE SET; Schema: public; Owner: %user%
---
-
-SELECT pg_catalog.setval('attribute_id_seq', 2, true);
-
-
---
--- Data for Name: item; Type: TABLE DATA; Schema: public; Owner: %user%
---
 
 INSERT INTO item VALUES (1, 'Parable of the Sower', 'texttexttext');
 INSERT INTO item VALUES (2, 'Parable of the Talents', 'texttexttext');
 INSERT INTO item VALUES (3, 'War and Peace', 'texttexttext');
 INSERT INTO item VALUES (4, 'Infinite Jest', 'texttexttext');
-
-
---
--- Data for Name: item_attrs; Type: TABLE DATA; Schema: public; Owner: %user%
---
 
 INSERT INTO item_attrs VALUES (1, 1, 3);
 INSERT INTO item_attrs VALUES (2, 1, 4);
@@ -294,99 +293,53 @@ INSERT INTO item_attrs VALUES (6, 3, 5);
 INSERT INTO item_attrs VALUES (7, 4, 2);
 INSERT INTO item_attrs VALUES (8, 4, 5);
 
-
---
--- Name: item_attrs_id_seq; Type: SEQUENCE SET; Schema: public; Owner: %user%
---
-
-SELECT pg_catalog.setval('item_attrs_id_seq', 8, true);
-
-
---
--- Name: item_id_seq; Type: SEQUENCE SET; Schema: public; Owner: %user%
---
-
-SELECT pg_catalog.setval('item_id_seq', 4, true);
-
-
---
--- Data for Name: sparkive_user; Type: TABLE DATA; Schema: public; Owner: %user%
---
-
-
-
---
--- Name: sparkive_user_id_seq; Type: SEQUENCE SET; Schema: public; Owner: %user%
---
-
-SELECT pg_catalog.setval('sparkive_user_id_seq', 1, false);
-
-
---
--- Name: attr_values attr_values_pk; Type: CONSTRAINT; Schema: public; Owner: %user%
---
-
 ALTER TABLE ONLY attr_values
     ADD CONSTRAINT attr_values_pk PRIMARY KEY (id);
 
 
---
--- Name: attribute attribute_pk; Type: CONSTRAINT; Schema: public; Owner: %user%
---
 
 ALTER TABLE ONLY attribute
     ADD CONSTRAINT attribute_pk PRIMARY KEY (id);
 
 
---
--- Name: item_attrs item_attrs_pk; Type: CONSTRAINT; Schema: public; Owner: %user%
---
 
 ALTER TABLE ONLY item_attrs
     ADD CONSTRAINT item_attrs_pk PRIMARY KEY (id);
 
 
---
--- Name: item item_pk; Type: CONSTRAINT; Schema: public; Owner: %user%
---
 
 ALTER TABLE ONLY item
     ADD CONSTRAINT item_pk PRIMARY KEY (id);
 
 
---
--- Name: sparkive_user user_pk; Type: CONSTRAINT; Schema: public; Owner: %user%
---
+
+ALTER TABLE ONLY sess_token
+    ADD CONSTRAINT sess_token_pk PRIMARY KEY (id);
+
+
 
 ALTER TABLE ONLY sparkive_user
-    ADD CONSTRAINT user_pk PRIMARY KEY (id);
+    ADD CONSTRAINT sparkive_user_pk PRIMARY KEY (id);
 
 
---
--- Name: attr_values attr_values_fk0; Type: FK CONSTRAINT; Schema: public; Owner: %user%
---
+
+ALTER TABLE ONLY sparkive_user
+    ADD CONSTRAINT sparkive_user_username_key UNIQUE (username);
+
+
 
 ALTER TABLE ONLY attr_values
     ADD CONSTRAINT attr_values_fk0 FOREIGN KEY (attr_id) REFERENCES attribute(id);
 
 
---
--- Name: item_attrs item_attrs_fk0; Type: FK CONSTRAINT; Schema: public; Owner: %user%
---
 
 ALTER TABLE ONLY item_attrs
     ADD CONSTRAINT item_attrs_fk0 FOREIGN KEY (item_id) REFERENCES item(id);
 
 
---
--- Name: item_attrs item_attrs_fk1; Type: FK CONSTRAINT; Schema: public; Owner: %user%
---
 
 ALTER TABLE ONLY item_attrs
     ADD CONSTRAINT item_attrs_fk1 FOREIGN KEY (attr_value_id) REFERENCES attr_values(id);
 
 
---
--- PostgreSQL database dump complete
---
 
