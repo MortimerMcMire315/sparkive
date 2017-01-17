@@ -1,0 +1,7 @@
+<html>
+    ^{headerT}
+    <body>
+        ^{mainPageBannerT}
+        <div #content>
+            ^{content}
+    ^{footerT}

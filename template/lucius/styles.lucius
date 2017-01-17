@@ -112,7 +112,7 @@ div.navbar-item {
 	font-weight: bold;
 }
 
-.main-page-container {
+#content {
     position: relative;
 	padding: 50px;
     z-index: 0;

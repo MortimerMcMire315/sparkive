@@ -30,6 +30,8 @@ import View.Util         ( requireLogin
                          , tryQuery, withConn
                          , withConnErrBox, EDBConn )
 import View.LoginView    ( login                   )
+import DB.Types          ( DBConn                  )
+
 import qualified DB.Query as Query
 import qualified View.Template as Template
 import qualified Auth.Login as Login
@@ -51,12 +53,25 @@ createDBButton :: EDBConn -> SessionServerPart Response
 createDBButton eitherConn = do
     results <- liftIO $ withConnErrBox eitherConn
         (\conn -> tryQuery conn (Query.createDB "sparkive")
-                                (\_ -> return $ Template.genericResultT [["something"]])
+                                (\_ -> demoQuery conn)
         )
     ok $ toResponse results
 
+demoQuery :: DBConn -> IO Html
+demoQuery conn = return $ Template.genericResultT [["something"]]
+
 homePage :: EDBConn -> SessionServerPart Response
-homePage eitherConn = ok . toResponse $ Template.homePageT Template.createDBButtonT
+homePage eitherConn = toDisplay >>= (ok . toResponse . Template.homePageT)
+    where toDisplay = liftIO $ 
+            withConnErrBox eitherConn
+                           (\conn -> 
+                               tryQuery conn Query.checkDBExists 
+                                   (\dbExists -> if   dbExists
+                                                 then demoQuery conn
+                                                 else return Template.createDBButtonT
+                                   )
+                           )
+
 
 adminPanel :: EDBConn -> SessionServerPart Response
 adminPanel eitherConn = requireLogin $

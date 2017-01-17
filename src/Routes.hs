@@ -27,5 +27,3 @@ routes conn = do
          , dir  "admin-panel"         $ Views.adminPanel conn
          , nullDir                   >> Views.homePage conn
          ]
-
-

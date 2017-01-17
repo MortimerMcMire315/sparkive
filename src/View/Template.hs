@@ -39,14 +39,19 @@ errBoxT err = let errStr = preEscapedToHtml err in
 genericResultT :: [[String]] -> Html
 genericResultT results = $(shamletFile $ hamFile "generic-result")
 
+genericAdminPageT :: Html -> Html
+genericAdminPageT content = $(shamletFile $ hamFile "generic-admin-page")
+
 createDBButtonT :: Html
 createDBButtonT = $(shamletFile $ hamFile "create-db-button")
 
 loginPageT :: Maybe Html -> Html
-loginPageT maybeErr = $(shamletFile $ hamFile "login")
+loginPageT maybeErr = genericAdminPageT $ $(shamletFile $ hamFile "login")
 
 homePageT :: Html -> Html
-homePageT toDisplay = $(shamletFile $ hamFile "home")
+--the Html argument just makes for convenient development, and
+--should be removed as this project matures.
+homePageT toDisplay = genericAdminPageT $ $(shamletFile $ hamFile "home")
 
 adminPanelT :: Html
-adminPanelT = $(shamletFile $ hamFile "admin-panel")
+adminPanelT = genericAdminPageT $ $(shamletFile $ hamFile "admin-panel")

@@ -1,3 +1,2 @@
-<div #content>
-    <div .text-button-container>
-        <a href="#" .text-button .create-db-button>Create Database
+<div .text-button-container>
+    <a href="#" .text-button .create-db-button>Create Database

@@ -1,40 +1,24 @@
-<html>
-    ^{headerT}
-    ^{mainPageBannerT}
-    $case maybeErr
-        $of Just err
-            ^{err}
-        $of Nothing
-            <div>
-<!--
-    <div #login>
-        <form method="post" action="/login">
-            <div .login-fields>
-                <label>Username
-                <p>
-                    <input type="text" placeholder="Enter Username" name="uname" required>
-
-                <label>Password
-                <p>
-                    <input type="password" placeholder="Enter Username" name="psw" required>
-
-                <button type="submit">Login
--->
+$case maybeErr
+    $of Just err
+        ^{err}
+    $of Nothing
+        <div>
 
 <section class="login-container">
-    <div class="login">
-        <h1>Login to Sparkive Admin Panel
-        <form method="post" action="/login">
-            <p>
-                <input type="text" name="username" value="" placeholder="Username or Email">
-            <p>
-                <input type="password" name="password" value="" placeholder="Password">
-            <p class="remember_me">
-                <label>
-                    <input type="checkbox" name="remember_me" id="remember_me">
-                        Remember me on this computer
-            <p class="submit"><input type="submit" name="commit" value="Login"></p>
+<div class="login">
+    <h1>Login to Sparkive Admin Panel
+    <form method="post" action="/login">
+        <p>
+            <input type="text" name="username" value="" placeholder="Username">
+        <p>
+            <input type="password" name="password" value="" placeholder="Password">
+        <p class="remember_me">
+            <label>
+                <input type="checkbox" name="remember_me" id="remember_me">
+                    Remember me on this computer
+        <p class="submit">
+            <input type="submit" name="commit" value="Login">
 
-    <div class="login-help">
-        <p>Forgot your password?
-            <a href="index.html">Click here to reset it
+<div class="login-help">
+    <p>Forgot your password?
+        <a href="index.html">Click here to reset it
