@@ -6,7 +6,7 @@ btn.click(function() {
         url: "/ajax/create-db"
     })
      .done(function(data) {
-         btn.parent().append('<div id="ajax-response"><span class="blank"></span></div>');
+         btn.parent().parent().append('<div id="ajax-response"><span class="blank"></span></div>');
          btn.remove();
          $('div#ajax-response span.blank').append(data);
      });

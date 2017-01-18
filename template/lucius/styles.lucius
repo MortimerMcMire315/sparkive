@@ -118,6 +118,11 @@ div.navbar-item {
     z-index: 0;
 }
 
+#ajax-response {
+    width: 50%;
+    margin: 0 auto;
+}
+
 .err-box {
     background-color: #e1df38;
     color: #250a87;

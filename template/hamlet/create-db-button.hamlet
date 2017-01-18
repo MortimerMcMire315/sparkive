@@ -1,2 +1,3 @@
 <div .text-button-container>
     <a href="#" .text-button .create-db-button>Create Database
+<script src="/js/create-db-button.js">

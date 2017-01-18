@@ -1,6 +1,21 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE RankNTypes #-}
 
+-- $doc
+-- Exceptions for Sparkive are handled exclusively with Control.Monad.Catch.
+-- Anything that has the potential to throw an error in this codebase will be
+-- caught immediately (i.e. in the callee, not the caller), and the callee will
+-- return (Either String a), where the Left result (String) is a string
+-- describing the error. The caller will then deal with the Either return type.
+--
+-- In order to do this, any throwing code will be caught using 'catches' from
+-- 'Control.Monad.Catch', using a handler found here. This will convert any
+-- errors to (Either String a) for safer handling.
+--
+-- All exception constructors built with 'buildErrorHandler' have the type
+-- String -> FooException, since they all take an error string. All handlers
+-- have the type (MonadCatch m) => Handler m (Either String a).
+
 module Exception.Handler
     ( ConfigParseException(..)
     , InvalidPortException(..)
@@ -19,6 +34,7 @@ module Exception.Handler
     , handleSQLFormatError
     , handleUsernameTakenException
     , sqlErrorHandlers
+    -- $doc
     ) where
 
 import Data.Typeable.Internal     ( Typeable         )
