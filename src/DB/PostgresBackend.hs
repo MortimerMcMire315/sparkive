@@ -12,6 +12,7 @@ import Database.PostgreSQL.Simple ( query_
                                   , query
                                   , execute_
                                   , execute
+                                  , Binary(..)
                                   , Connection
                                   , Query
                                   , Only(..)   )
@@ -65,9 +66,9 @@ createDB user conn = do
             let (q :: Query) = read . show $ replace "%user%" user fileStr
             tryQuery rawResults $ execute_ conn q
 
+--TODO!!! Check if user already exists. Or did we do this elsewhere? Where should I put it????
 insertUser :: String -> ByteString -> ByteString -> Connection -> IO (Either String ())
-insertUser username pass salt conn =
-    tryQuery rawResults $
+insertUser username pass salt conn = tryQuery rawResults $
         execute conn "INSERT INTO sparkive_user (username, pass, salt) VALUES (?,?,?)" (username, pass, salt)
 
 getUserAttr :: IO [Only ByteString]-> IO (Either String ByteString)
@@ -102,3 +103,7 @@ checkUserExists username conn = do
         then Left $ "Error: More than one user with username \"" ++ username ++ "\" found in database."
         else Right (not $ null bss)
       )
+
+insertSessToken :: String -> ByteString -> Connection -> IO (Either String ())
+insertSessToken username token conn = tryQuery rawResults $
+    execute conn "INSERT INTO sess_token (username, token) VALUES (?,?)" (username, Binary token)

@@ -45,8 +45,8 @@ genericAdminPageT content = $(shamletFile $ hamFile "generic-admin-page")
 createDBButtonT :: Html
 createDBButtonT = $(shamletFile $ hamFile "create-db-button")
 
-loginPageT :: Maybe Html -> Html
-loginPageT maybeErr = genericAdminPageT $ $(shamletFile $ hamFile "login")
+loginPageT :: Html -> Html
+loginPageT err = genericAdminPageT $ $(shamletFile $ hamFile "login")
 
 homePageT :: Html -> Html
 --the Html argument just makes for convenient development, and

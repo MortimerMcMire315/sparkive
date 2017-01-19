@@ -1,5 +1,6 @@
 module View.Util ( nullDirServe
                  , requireLogin
+                 , respondWithErr
                  , tryQuery
                  , withConn
                  , withConnErrBox
@@ -58,6 +59,9 @@ requireLogin action = do
     rqData       <- askRq
     let needLogin = "You must be logged in to access this page."
     case maybeToken of
-        Nothing    -> putUltDest (Just $ rqUri rqData) >> (ok . toResponse $ T.loginPageT (Just $ T.errBoxT needLogin))
+        Nothing    -> putUltDest (Just $ rqUri rqData) >> (ok . toResponse . T.loginPageT $ T.errBoxT needLogin)
         --TODO actually check the token
         Just token -> action
+
+respondWithErr :: (Html -> Html) -> String -> SessionServerPart Response
+respondWithErr template = ok . toResponse . template . T.errBoxT

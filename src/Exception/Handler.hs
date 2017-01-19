@@ -118,7 +118,9 @@ handleSQLQueryError = Handler
 -- |See Database.PostgreSQL.Simple.FormatError
 handleSQLFormatError :: (MonadCatch m, MonadThrow m) => Handler m (Either String a)
 handleSQLFormatError = Handler
-    (\FormatError{} -> return . Left $ "FormatError: The SQL query could not be formatted correctly.")
+    (\(FormatError msg query params) -> return . Left $ errStr msg query params)
+    where errStr msg query params = "FormatError: The SQL query could not be formatted correctly.\n\
+                                   \ Msg: " ++ msg ++ "\nQuery: " ++ show query ++ "\nParams: " ++ show params
 
 -- Convenient to include these all at once when running queries.
 sqlErrorHandlers :: (MonadCatch m, MonadThrow m) => [Handler m (Either String a)]

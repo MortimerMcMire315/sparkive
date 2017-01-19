@@ -1,8 +1,4 @@
-$case maybeErr
-    $of Just err
-        ^{err}
-    $of Nothing
-        <div>
+^{err}
 
 <section class="login-container">
 <div class="login">

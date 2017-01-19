@@ -5,6 +5,7 @@ module DB.Query
     , getPassHash
     , getSalt
     , checkUserExists
+    , insertSessToken
     ) where
 
 import Data.ByteString            ( ByteString  )
@@ -44,3 +45,11 @@ getSalt username = doQuery (PG.getSalt username)
 checkUserExists :: String -> DBConn -> IO (Either String Bool)
 checkUserExists username = doQuery (PG.checkUserExists username)
                                    (AS.checkUserExistsQ username)
+
+insertSessToken :: String -> ByteString -> DBConn -> IO (Either String ())
+insertSessToken username token conn = do
+    putStrLn "here"
+    res <- doQuery (PG.insertSessToken username token )
+                   (AS.insertSessTokenQ username token) conn
+    putStrLn "here2"
+    return res
