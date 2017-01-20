@@ -4,6 +4,7 @@
 
 module DB.AcidStateBackend ( insertUserQ
                            , insertSessTokenQ
+                           , verifySessTokenQ
                            , checkUserExistsQ
                            , getPassHashQ
                            , getSaltQ
@@ -48,7 +49,7 @@ data Item = Item { title    :: String
                  }
 
 --Maps username to token
-newtype SessTokens = SessTokens { tokenMap :: M.Map String ByteString }
+newtype SessTokens = SessTokens { tokenMap :: M.Map ByteString String }
 
 data Archive = Archive { users       :: Users
                        , attributes  :: [Attribute]
@@ -93,10 +94,16 @@ insertSessToken :: String -> ByteString -> Update Archive ()
 insertSessToken uname tok = do
     db <- get
     let (SessTokens map) = tokens db
-    let newTokens = SessTokens $ M.insert uname tok map
+    let newTokens = SessTokens $ M.insert tok uname map
     put $ db { tokens = newTokens }
 
-$(makeAcidic ''Archive ['insertUser, 'getUserByName, 'insertSessToken])
+verifySessToken :: ByteString -> Query Archive (Maybe String)
+verifySessToken tok = do
+    db <- ask
+    let tokMap = tokenMap $ tokens db
+    return $ M.lookup tok tokMap
+
+$(makeAcidic ''Archive ['insertUser, 'getUserByName, 'insertSessToken, 'verifySessToken])
 
 
 {--- ACTUAL QUERIES ---}
@@ -106,6 +113,9 @@ insertUserQ u passHash salt a = handles [E.handleUsernameTakenException] $
 
 insertSessTokenQ :: String -> ByteString -> AcidState Archive -> IO (Either String ())
 insertSessTokenQ uname tok a = fmap Right . update a $ InsertSessToken uname tok
+
+verifySessTokenQ :: ByteString -> AcidState Archive -> IO (Either String (Maybe String))
+verifySessTokenQ tok a = fmap Right . query a $ VerifySessToken tok
 
 getUserAttrQ :: (User -> a) -> String -> AcidState Archive -> IO (Either String a)
 getUserAttrQ f u a = do

@@ -107,3 +107,12 @@ checkUserExists username conn = do
 insertSessToken :: String -> ByteString -> Connection -> IO (Either String ())
 insertSessToken username token conn = tryQuery rawResults $
     execute conn "INSERT INTO sess_token (username, token) VALUES (?,?)" (username, Binary token)
+
+-- If the token exists, return the username.
+-- Otherwise, return Nothing.
+verifySessToken :: ByteString -> Connection -> IO (Either String (Maybe String))
+verifySessToken token conn = tryQuery f $
+        query conn "SELECT username FROM sess_token WHERE token = ?" (Only $ Binary token)
+    where f res = if null res
+                  then Nothing
+                  else Just (head res :: String)

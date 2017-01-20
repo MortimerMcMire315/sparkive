@@ -5,6 +5,7 @@ module DB.Query
     , getPassHash
     , getSalt
     , checkUserExists
+    , verifySessToken
     , insertSessToken
     ) where
 
@@ -46,10 +47,12 @@ checkUserExists :: String -> DBConn -> IO (Either String Bool)
 checkUserExists username = doQuery (PG.checkUserExists username)
                                    (AS.checkUserExistsQ username)
 
+-- Returns either an error string or maybe a username. If the token is not found,
+-- returns (Right Nothing); if the token is found, returns (Left username)
+verifySessToken :: ByteString -> DBConn -> IO (Either String (Maybe String))
+verifySessToken token = doQuery (PG.verifySessToken token)
+                                (AS.verifySessTokenQ token)
+
 insertSessToken :: String -> ByteString -> DBConn -> IO (Either String ())
-insertSessToken username token conn = do
-    putStrLn "here"
-    res <- doQuery (PG.insertSessToken username token )
-                   (AS.insertSessTokenQ username token) conn
-    putStrLn "here2"
-    return res
+insertSessToken username token = doQuery (PG.insertSessToken username token)
+                                         (AS.insertSessTokenQ username token)
