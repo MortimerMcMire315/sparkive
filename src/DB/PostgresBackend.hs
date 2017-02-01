@@ -115,4 +115,4 @@ verifySessToken token conn = tryQuery f $
         query conn "SELECT username FROM sess_token WHERE token = ?" (Only $ Binary token)
     where f res = if null res
                   then Nothing
-                  else Just (head res :: String)
+                  else Just (head $ head res :: String)

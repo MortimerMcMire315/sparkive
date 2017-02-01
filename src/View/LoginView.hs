@@ -1,5 +1,6 @@
 module View.LoginView ( login
                       , loginPost
+                      , doLogin
                       ) where
 
 -- External modules
@@ -54,7 +55,10 @@ loginPost eitherConn = withConn eitherConn
             --If the login failed, serve the login page with the error displayed.
             Left err  -> respondWithErr T.loginPageT err
             --Login success.
-            Right sessToken -> storeSession uname sessToken conn
+            Right sessToken -> do
+                --Store the session token in the user's cookie and in the database
+                storeResult <- putToken uname sessToken conn
+                serveLoginResponse uname storeResult conn
     )
 
 doLogin :: String -> String -> DBConn ->  IO (Either String ByteString)
@@ -76,20 +80,18 @@ passCheck uname pass conn = do
                          then Right <$> getRandomToken
                          else return $ Left "Incorrect password."
 
-storeSession :: String -> ByteString -> DBConn -> SessionServerPart Response
-storeSession uname sessToken conn = do
-    ultDest <- getUltDest
-
-    --If there is an ultimate destination, set it as the next URL. otherwise,
-    --go to the admin panel.
-    let nextUrl = fromMaybe "/admin-panel" ultDest
-
-    --Clear ultDest so that the user doesn't get unexpectedly redirected later
-    putUltDest Nothing
-
-    --Store the session token in the user's cookie and in the database
-    storeTokenResult <- putToken uname sessToken conn
-    case storeTokenResult of
-        --Something truly god-awful happened if this returns Left
+serveLoginResponse :: String -> Either String () -> DBConn -> SessionServerPart Response
+serveLoginResponse uname storeResult conn =
+    case storeResult of
+        --Something truly god-awful happened if this is Left. Probably Y2K
         Left err' -> respondWithErr T.loginPageT err'
-        Right ()  -> seeOther nextUrl (toResponse "")
+        Right ()  -> do
+            ultDest <- getUltDest
+
+            --If there is an ultimate destination, set it as the next URL. otherwise,
+            --go to the admin panel.
+            let nextUrl = fromMaybe "/admin-panel" ultDest
+
+            --Clear ultDest so that the user doesn't get unexpectedly redirected later
+            putUltDest Nothing
+            seeOther nextUrl (toResponse "")
