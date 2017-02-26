@@ -1,4 +1,6 @@
-*.sw{p,o,n}
+*.swp
+*.swo
+*.swn
 .stack-work/
 client_session_key.aes
 conf/sparkive.conf

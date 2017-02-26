@@ -24,6 +24,6 @@ routes conn = do
          , dir  "js"                    Views.serveJS
          , dirs "ajax/create-db"      $ Views.createDBButton conn
          , dir  "login"               $ Login.login conn
-         , dir  "admin-panel"         $ Views.adminPanel conn
+         , dir  "admin-panel"         $ Login.adminPanel conn
          , nullDir                   >> Views.homePage conn
          ]

@@ -3,12 +3,10 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module View.Views
-    ( adminPanel
-    , homePage
+    ( homePage
     , serveCSS
     , serveJS
     , createDBButton
-    , login
     ) where
 
 import Happstack.Server       ( notFound
@@ -28,28 +26,29 @@ import View.ContentTypes ( MIMEType(CSS, JS, HTML) )
 import View.Util         ( requireLogin
                          , nullDirServe
                          , tryQuery, withConn
-                         , withConnErrBox, EDBConn )
-import View.LoginView    ( login                   )
+                         , withConnErrBox
+                         , SchrodingerConn         )
 import DB.Types          ( DBConn                  )
 
 import qualified DB.Query as Query
 import qualified View.Template as Template
 import qualified Auth.Login as Login
 
--- |Serve a CSS file.
+-- |Serve a CSS file from 'View.Template'
 serveCSS :: SessionServerPart Response
 serveCSS = lift . path $ \(cssRequest :: String) ->
                          case cssRequest of
                             "styles.css" -> nullDirServe Template.mainStyleSheet CSS
                             _            -> notFound $ toResponse ("CSS stylesheet not found." :: String)
 
+-- |Serve a JS file from 'View.Template'
 serveJS :: SessionServerPart Response
 serveJS = lift . path $ \(jsRequest :: String) ->
              case jsRequest of
                 "create-db-button.js" -> nullDirServe Template.createDBButtonJS JS
                 _            -> notFound $ toResponse ("JavaScript file not fouund." :: String)
 
-createDBButton :: EDBConn -> SessionServerPart Response
+createDBButton :: SchrodingerConn -> SessionServerPart Response
 createDBButton eitherConn = do
     results <- liftIO $ withConnErrBox eitherConn
         (\conn -> tryQuery conn (Query.createDB "sparkive")
@@ -60,19 +59,14 @@ createDBButton eitherConn = do
 demoQuery :: DBConn -> IO Html
 demoQuery conn = return $ Template.genericResultT [["something"]]
 
-homePage :: EDBConn -> SessionServerPart Response
+homePage :: SchrodingerConn -> SessionServerPart Response
 homePage eitherConn = toDisplay >>= (ok . toResponse . Template.homePageT)
-    where toDisplay = liftIO $ 
+    where toDisplay = liftIO $
             withConnErrBox eitherConn
-                           (\conn -> 
-                               tryQuery conn Query.checkDBExists 
+                           (\conn ->
+                               tryQuery conn Query.checkDBExists
                                    (\dbExists -> if   dbExists
                                                  then demoQuery conn
                                                  else return Template.createDBButtonT
                                    )
                            )
-
-
-adminPanel :: EDBConn -> SessionServerPart Response
-adminPanel eitherConn = requireLogin $
-    ok $ toResponse Template.adminPanelT

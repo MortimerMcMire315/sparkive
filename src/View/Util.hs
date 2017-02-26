@@ -1,10 +1,11 @@
-module View.Util ( nullDirServe
+module View.Util ( isLoggedIn
+                 , nullDirServe
                  , requireLogin
                  , respondWithErr
                  , tryQuery
                  , withConn
                  , withConnErrBox
-                 , EDBConn        ) where
+                 , SchrodingerConn ) where
 
 import Control.Monad.IO.Class ( liftIO )
 import Happstack.Server       ( ok
@@ -17,6 +18,7 @@ import Happstack.Server       ( ok
                               , Response
                               , ToMessage  )
 import Text.Hamlet            ( Html       )
+import Data.Maybe             ( isJust     )
 
 import View.ContentTypes ( toResMime
                          , MIMEType           )
@@ -26,20 +28,22 @@ import Auth.Session      ( getToken
                          , SessionServerPart  )
 import qualified View.Template as T
 
-type EDBConn = Either String DBConn
+-- |A database connection in a quantum state of uncertainty. It doesn't matter
+--  whether or not it's a valid connection until we look inside.
+type SchrodingerConn = Either String DBConn
 
 -- |Make sure the request is sane (no path segments after *.css or *.js or
 --  whatever); if so, serve the file with MIME type "text/css"
 nullDirServe :: (ToMessage t) => t -> MIMEType -> ServerPart Response
 nullDirServe template mimeT = nullDir >> ok (toResMime template mimeT)
 
-withConn :: (Monad m) => EDBConn -> (String -> m a) -> (DBConn -> m a) -> m a
+withConn :: (Monad m) => SchrodingerConn -> (String -> m a) -> (DBConn -> m a) -> m a
 withConn eitherConn failAction successAction =
     case eitherConn of
         Left err -> failAction err
         Right conn -> successAction conn
 
-withConnErrBox :: EDBConn -> (DBConn -> IO Html) -> IO Html
+withConnErrBox :: SchrodingerConn -> (DBConn -> IO Html) -> IO Html
 withConnErrBox eitherConn = withConn eitherConn (return . T.errBoxT)
 
 -- |Attempt to run a SQL query given a 'DBConn', a query function from 'Query',
@@ -65,3 +69,8 @@ requireLogin action = do
 
 respondWithErr :: (Html -> Html) -> String -> SessionServerPart Response
 respondWithErr template = ok . toResponse . template . T.errBoxT
+
+isLoggedIn :: SessionServerPart Bool
+isLoggedIn = do
+    maybeToken <- getToken
+    return $ isJust maybeToken

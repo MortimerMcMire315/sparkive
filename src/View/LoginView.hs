@@ -1,4 +1,5 @@
-module View.LoginView ( login
+module View.LoginView ( adminPanel
+                      , login
                       , loginPost
                       , doLogin
                       ) where
@@ -8,27 +9,31 @@ import Control.Monad          ( msum            )
 import Control.Monad.IO.Class ( liftIO          )
 import Data.Maybe             ( fromMaybe       )
 import Data.ByteString        ( ByteString      )
-import Happstack.Server       ( ok
-                              , look
-                              , toResponse
-                              , seeOther
-                              , ServerPart
-                              , Response
-                              , method
-                              , Method ( GET
+import Happstack.Server       ( Method ( GET
                                        , HEAD
-                                       , POST ) )
+                                       , POST )
+                              , Response
+                              , ServerPart
+                              , localRq
+                              , look
+                              , method
+                              , ok
+                              , rqUri
+                              , seeOther
+                              , toResponse      )
 import Text.Blaze.Html        ( toHtml          )
 
 -- Local modules
-import View.Util    ( EDBConn
-                    , withConn
-                    , respondWithErr    )
+import View.Util    ( SchrodingerConn
+                    , isLoggedIn
+                    , requireLogin
+                    , respondWithErr
+                    , withConn          )
 import Auth.Session ( SessionServerPart
                     , getToken
+                    , getUltDest
                     , putToken
-                    , putUltDest
-                    , getUltDest        )
+                    , putUltDest        )
 import Auth.Login   ( isCorrectPass     )
 import DB.Query     ( checkUserExists   )
 import DB.Types     ( DBConn            )
@@ -37,13 +42,32 @@ import qualified View.Template as T
 
 emptyHtml = toHtml ""
 
-login :: EDBConn -> SessionServerPart Response
-login eitherConn = msum [ method [GET,HEAD] >> (ok . toResponse $ T.loginPageT emptyHtml)
-                        , method POST >> loginPost eitherConn
-                        ]
+adminPanel :: SchrodingerConn -> SessionServerPart Response
+-- Manually set the URI to /admin-panel in case the user requested /login. This
+-- ensures that the ult-dest is set to /admin-panel.
+adminPanel sConn = requireLogin . ok $ toResponse T.adminPanelT
 
-loginPost :: EDBConn -> SessionServerPart Response
-loginPost eitherConn = withConn eitherConn
+-- |Routing for /login:
+--  GET: use the 'adminPanel' view because it requires a login, then serves the
+--  login page.
+--  POST: Validate credentials using loginPost
+login :: SchrodingerConn -> SessionServerPart Response
+login sConn = msum [ method [GET,HEAD] >> loginGet sConn
+                   , method POST       >> loginPost sConn
+                   ]
+
+-- |Check if the user is already logged in. If so, redirect to /admin-panel.
+--  If not, serve the login page.
+loginGet :: SchrodingerConn -> SessionServerPart Response
+loginGet sConn = do
+    loggedIn <- isLoggedIn
+    if loggedIn
+    then seeOther "/admin-panel" (toResponse "Redirecting to /admin-panel...")
+    else ok . toResponse $ T.loginPageT emptyHtml
+
+
+loginPost :: SchrodingerConn -> SessionServerPart Response
+loginPost sConn = withConn sConn
     --If connection fails, respond with error
     (respondWithErr T.loginPageT)
     (\conn -> do
@@ -53,7 +77,7 @@ loginPost eitherConn = withConn eitherConn
         loginResults <- liftIO $ doLogin uname pass conn
         case loginResults of
             --If the login failed, serve the login page with the error displayed.
-            Left err  -> respondWithErr T.loginPageT err
+            Left err -> respondWithErr T.loginPageT err
             --Login success.
             Right sessToken -> do
                 --Store the session token in the user's cookie and in the database
@@ -94,4 +118,4 @@ serveLoginResponse uname storeResult conn =
 
             --Clear ultDest so that the user doesn't get unexpectedly redirected later
             putUltDest Nothing
-            seeOther nextUrl (toResponse "")
+            seeOther nextUrl (toResponse "Redirecting to ultimate destination...")
