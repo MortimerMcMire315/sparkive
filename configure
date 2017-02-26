@@ -1,0 +1,6 @@
+#!/bin/bash
+echo "Checking for existence of \"sass\" command..."
+command -v sass >/dev/null 2>&1 || { echo >&2 "No SASS/SCSS compiler found."; exit 1; }
+
+echo "Compiling SCSS files..."
+sass ./template/lucius/styles.scss ./template/lucius/styles.lucius

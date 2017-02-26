@@ -1,0 +1,146 @@
+@import "login";
+@import "reset";
+@import "text-button";
+
+$body-font: 'Lato', sans-serif;
+$title-font: 'Poppins', sans-serif;
+$bg-gray: #f2f2f2;
+$purple: #4b148c;
+
+@mixin shadow($horiz, $vert, $blur, $spread, $color) {
+    -webkit-box-shadow: $horiz $vert $blur $spread $color;
+    -moz-box-shadow: $horiz $vert $blur $spread $color;
+    box-shadow: $horiz $vert $blur $spread $color;
+}
+
+body {
+    margin: 0px;
+    font-family: $body-font;
+    background-color: $bg-gray;
+}
+
+#main-page-banner {
+    position: relative;
+    background-color: $purple;
+    z-index: 3;
+    width: 100%;
+    overflow: hidden;
+}
+
+#main-page-banner a {
+    text-decoration: none;
+    color: $bg-gray;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    padding-top: 0px;
+    padding-bottom: 0px;
+    overflow: hidden;
+}
+
+#main-page-banner #title {
+    margin-left: 50px;
+    width: 50%;
+    overflow: hidden;
+}
+
+#main-page-banner #sparkive-heading {
+    font-family: $title-font;
+    position: relative;
+    font-size: 50px;
+    float: left;
+}
+
+#main-page-banner #sparkive-colon {
+    font-family: $title-font;
+    position: relative;
+    padding-top: 5px;
+    padding-left: 7px;
+    font-size: 40px;
+    float: left;
+}
+
+#main-page-banner #sparkive-subheading {
+    font-family: 'Lato', sans-serif;
+    position: relative;
+    font-size: 16px;
+    padding-top: 30px;
+    padding-left: 10px;
+    float: left;
+}
+
+/*Goes right under the main banner*/
+#silly-blue-line {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    height: 10px;
+    background-color: #8d0981;
+    @include shadow(0px, -8px, 30px, 0px, rgba(0,0,0,1));
+}
+
+#navbar {
+    position: relative;
+    background-color: #211d90;
+    width:100%;
+    height:38px;
+    line-height:38px;
+    z-index: 1;
+    @include shadow(0px, -3px, 30px, 0px, rgba(0,0,0,1));
+}
+
+div#navbar-item-container {
+    margin-left: 50px;
+    overflow: hidden;
+}
+
+div.navbar-item {
+    /* padding-left: */
+    text-align: center;
+    float: left;
+}
+
+.navbar-item a {
+    text-decoration: none;
+    color: $bg-gray;
+    font-weight: bold;
+}
+
+#content {
+    position: relative;
+    padding: 50px;
+    z-index: 0;
+}
+
+#ajax-response {
+    width: 50%;
+    margin: 0 auto;
+}
+
+.err-box {
+    background-color: #e1df38;
+    color: #250a87;
+    text-align: center;
+    width: 50%;
+    margin: 0 auto;
+    padding: 20px;
+    border-style: solid;
+    border-width: 1px;
+    border-color: #380700;
+}
+
+.err-box-container {
+    width: 100%;
+    text-align: center;
+    padding-top: 50px;
+}
+
+.err-box-text {
+    text-align: left;
+}
+
+#content {
+    margin: 0 auto;
+    width: 100%;
+    padding: 0px;
+    padding-top: 30px;
+}

@@ -9,7 +9,7 @@ author:              Seth A. Yoder
 maintainer:          seth.a.yoder@gmail.com
 copyright:           2016 Seth A. Yoder
 category:            Web
-build-type:          Simple
+build-type:          Custom
 extra-source-files:  README.md
                    , conf/sparkive_example.conf
 cabal-version:       >=1.10
