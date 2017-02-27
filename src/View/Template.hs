@@ -15,6 +15,17 @@ import View.TemplateUtil ( hamFile
                          , cssFile
                          , jsFile            )
 
+data UserInfo = LoggedOut | LoggedIn { username :: String } deriving Show
+
+data RenderContext = RenderContext { user     :: UserInfo
+                                   , errors   :: [String]
+                                   , warnings :: [String]
+                                   , msgs     :: [String]
+                                   } deriving Show
+
+emptyRenderContext :: RenderContext
+emptyRenderContext = RenderContext LoggedOut [] [] []
+
 -- |styles.css, the main stylesheet for the site.
 mainStyleSheet = renderCss $ $(luciusFile (cssFile "styles")) undefined
 
