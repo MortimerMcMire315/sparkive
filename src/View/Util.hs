@@ -1,5 +1,7 @@
-module View.Util ( isLoggedIn
+module View.Util ( getBaseContext
+                 , isLoggedIn
                  , nullDirServe
+                 , provideContext
                  , requireLogin
                  , respondWithErr
                  , tryQuery
@@ -21,11 +23,13 @@ import Text.Hamlet            ( Html       )
 import Data.Maybe             ( isJust     )
 
 import View.ContentTypes ( toResMime
-                         , MIMEType           )
-import DB.Types          ( DBConn             )
+                         , MIMEType          )
+import DB.Query          ( verifySessToken   )
+import DB.Types          ( DBConn            )
 import Auth.Session      ( getToken
                          , putUltDest
-                         , SessionServerPart  )
+                         , SessionServerPart )
+import qualified View.RenderContext as RC
 import qualified View.Template as T
 
 -- |A database connection in a quantum state of uncertainty. It doesn't matter
@@ -43,8 +47,8 @@ withConn eitherConn failAction successAction =
         Left err -> failAction err
         Right conn -> successAction conn
 
-withConnErrBox :: SchrodingerConn -> (DBConn -> IO Html) -> IO Html
-withConnErrBox eitherConn = withConn eitherConn (return . T.errBoxT)
+withConnErrBox :: SchrodingerConn -> (DBConn -> SessionServerPart Html) -> SessionServerPart Html
+withConnErrBox eitherConn = withConn eitherConn (return . T.errBoxRawHtml)
 
 -- |Attempt to run a SQL query given a 'DBConn', a query function from 'Query',
 -- and a function to run on success. The success function uses the results of
@@ -54,7 +58,7 @@ tryQuery :: DBConn -> (DBConn -> IO (Either String a)) -> (a -> IO Html) -> IO H
 tryQuery conn queryF successAction = do
     eitherErrResults <- queryF conn
     case eitherErrResults of
-        Left err        -> return $ T.errBoxT err
+        Left err        -> return $ T.errBoxRawHtml err
         Right results   -> successAction results
 
 requireLogin :: SessionServerPart Response -> SessionServerPart Response
@@ -63,14 +67,53 @@ requireLogin action = do
     rqData       <- askRq
     let needLogin = "You must be logged in to access this page."
     case maybeToken of
-        Nothing    -> putUltDest (Just $ rqUri rqData) >> (ok . toResponse . T.loginPageT $ T.errBoxT needLogin)
+        Nothing    -> putUltDest (Just $ rqUri rqData) >> (ok . toResponse . T.loginPageT $ RC.errorRenderContext needLogin)
         --TODO actually check the token
         Just token -> action
 
-respondWithErr :: (Html -> Html) -> String -> SessionServerPart Response
-respondWithErr template = ok . toResponse . template . T.errBoxT
-
-isLoggedIn :: SessionServerPart Bool
-isLoggedIn = do
+getUserInfo :: DBConn -> SessionServerPart (Either String RC.UserInfo)
+getUserInfo conn = do
     maybeToken <- getToken
-    return $ isJust maybeToken
+    case maybeToken of
+        --If user has no token in their cookie, return false
+        Nothing -> return $ Right RC.LoggedOut
+        Just token -> do
+            queryR <- liftIO $ verifySessToken token conn
+            case queryR of
+                Left e -> return $ Left e
+                Right maybeUsername ->
+                    case maybeUsername of
+                        --If their token doesn't exist in the database,
+                        --make the user log in.
+                        Nothing -> return $ Right RC.LoggedOut
+                        Just u -> return . Right $ RC.LoggedIn u
+
+--getUsername :: DBConn -> SessionServerPart (Either String String)
+--getUsername conn = do eitherInfo <- getUserInfo conn
+--                      return $ eitherInfo >>= (\info -> case info of
+--                                                  RC.LoggedOut -> Left "User is not logged in."
+--                                                  RC.LoggedIn u -> Right u
+--                                              )
+
+isLoggedIn :: DBConn -> SessionServerPart (Either String Bool)
+isLoggedIn conn = do eitherInfo <- getUserInfo conn
+                     return $ eitherInfo >>= (\info -> case info of
+                                                 RC.LoggedOut  -> Right False
+                                                 RC.LoggedIn _ -> Right True
+                                             )
+
+getBaseContext :: DBConn -> SessionServerPart RC.RenderContext
+getBaseContext conn = do
+    eUserInfo <- getUserInfo conn
+    case eUserInfo of
+        Left e -> return $ RC.errorRenderContext e
+        Right uInfo -> return $ RC.emptyRenderContext {RC.user=uInfo}
+
+provideContext :: DBConn -> IO Html -> SessionServerPart RC.RenderContext
+provideContext conn html = do
+    htmlResult <- liftIO html
+    baseContext <- getBaseContext conn
+    return $ RC.contentOrErrors baseContext htmlResult
+
+respondWithErr :: (RC.RenderContext -> Html) -> String ->  SessionServerPart Response
+respondWithErr templateF e = ok . toResponse . templateF $ RC.emptyRenderContext {RC.errors = [e]}

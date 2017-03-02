@@ -4,18 +4,18 @@ module DB.Conn
     ( getConn
     ) where
 
-import Control.Monad              ( join                )
+import Control.Monad              ( join               )
 import Control.Monad.Catch        ( handleIOError
                                   , throwM
-                                  , catches             )
-import Control.Monad.IO.Class     ( liftIO              )
-import Data.Acid                  ( openLocalStateFrom  )
-import Data.Default               ( def                 )
+                                  , catches            )
+import Control.Monad.IO.Class     ( liftIO             )
+import Data.Acid                  ( openLocalStateFrom )
+import Data.Default               ( def                )
 import Database.PostgreSQL.Simple ( Connection
                                   , ConnectInfo(..)
-                                  , connect             )
-import GHC.Word                   ( Word16              )
-import Text.Read                  ( readMaybe           )
+                                  , connect            )
+import GHC.Word                   ( Word16             )
+import Text.Read                  ( readMaybe          )
 
 import DB.Types ( DBInfo(..)
                 , PostgresAuth(..)
@@ -63,11 +63,11 @@ getConn = do
        Left err -> return $ Left err
        Right info ->
            case info of
-               PostgresInfo dbauth -> putStrLn "postgres" >>
+               PostgresInfo dbauth ->
                    catches (Right <$> getPostgresConn dbauth)
                            [ E.handleInvalidPortException
                            , E.handleSQLConnectionException ]
-               AcidStateInfo dir -> putStrLn "acid" >>
+               AcidStateInfo dir ->
                    catches (Right <$> getAcidStateConn dir)
                            [ E.handleErrorCall ]
 

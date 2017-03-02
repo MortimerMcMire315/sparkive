@@ -12,4 +12,8 @@ $doctype 5
 <div #navbar>
     <div #navbar-item-container>
         <div .navbar-item>
-            <a href="/login">Login
+            $case RC.user rc
+                $of RC.LoggedOut
+                    <a href="/login">Login
+                $of RC.LoggedIn _
+                    <a href="/admin-panel">Admin Panel

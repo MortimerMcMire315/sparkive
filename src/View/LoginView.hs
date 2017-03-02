@@ -5,10 +5,10 @@ module View.LoginView ( adminPanel
                       ) where
 
 -- External modules
-import Control.Monad          ( msum            )
-import Control.Monad.IO.Class ( liftIO          )
-import Data.Maybe             ( fromMaybe       )
-import Data.ByteString        ( ByteString      )
+import Control.Monad          ( msum, (>=>)   )
+import Control.Monad.IO.Class ( liftIO        )
+import Data.Maybe             ( fromMaybe     )
+import Data.ByteString        ( ByteString    )
 import Happstack.Server       ( Method ( GET
                                        , HEAD
                                        , POST )
@@ -20,15 +20,17 @@ import Happstack.Server       ( Method ( GET
                               , ok
                               , rqUri
                               , seeOther
-                              , toResponse      )
-import Text.Blaze.Html        ( toHtml          )
+                              , toResponse    )
+import Text.Blaze.Html        ( toHtml        )
 
 -- Local modules
 import View.Util    ( SchrodingerConn
+                    , getBaseContext
                     , isLoggedIn
                     , requireLogin
                     , respondWithErr
-                    , withConn          )
+                    , withConn
+                    , withConnErrBox    )
 import Auth.Session ( SessionServerPart
                     , getToken
                     , getUltDest
@@ -39,13 +41,14 @@ import DB.Query     ( checkUserExists   )
 import DB.Types     ( DBConn            )
 import Util.Random  ( getRandomToken    )
 import qualified View.Template as T
-
-emptyHtml = toHtml ""
+import qualified View.RenderContext as RC
 
 adminPanel :: SchrodingerConn -> SessionServerPart Response
 -- Manually set the URI to /admin-panel in case the user requested /login. This
 -- ensures that the ult-dest is set to /admin-panel.
-adminPanel sConn = requireLogin . ok $ toResponse T.adminPanelT
+adminPanel sConn = htmlResult >>= (requireLogin . ok . toResponse)
+    where htmlResult =
+            withConnErrBox sConn $ getBaseContext >=> (return . T.adminPanelT)
 
 -- |Routing for /login:
 --  GET: use the 'adminPanel' view because it requires a login, then serves the
@@ -59,11 +62,20 @@ login sConn = msum [ method [GET,HEAD] >> loginGet sConn
 -- |Check if the user is already logged in. If so, redirect to /admin-panel.
 --  If not, serve the login page.
 loginGet :: SchrodingerConn -> SessionServerPart Response
-loginGet sConn = do
-    loggedIn <- isLoggedIn
-    if loggedIn
-    then seeOther "/admin-panel" (toResponse "Redirecting to /admin-panel...")
-    else ok . toResponse $ T.loginPageT emptyHtml
+loginGet sConn =
+    withConn
+      sConn
+      (respondWithErr T.loginPageT)
+      (\conn -> do
+        eLoggedIn <- isLoggedIn conn
+        case eLoggedIn of
+            Left e -> respondWithErr T.loginPageT e
+            Right loggedIn ->
+                if loggedIn
+                then seeOther "/admin-panel" (toResponse "Redirecting to /admin-panel...")
+                --TODO not empty context
+                else ok . toResponse $ T.loginPageT RC.emptyRenderContext
+      )
 
 
 loginPost :: SchrodingerConn -> SessionServerPart Response

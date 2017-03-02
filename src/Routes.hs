@@ -3,9 +3,10 @@ module Routes
     ) where
 
 import Happstack.Server
-import Control.Monad ( msum )
+import Control.Monad          ( msum )
+import Control.Monad.IO.Class ( liftIO )
 
-import DB.Types     ( DBConn            )
+import DB.Conn      ( getConn )
 import Auth.Session ( SessionServerPart )
 import qualified View.Views as Views
 import qualified View.LoginView as Login
@@ -16,8 +17,9 @@ myPolicy = defaultBodyPolicy "/tmp/" 0 1000 1000
 -- |Happstack routing function.
 --  /css/* -> 'Views.serveCSS'
 --  /      -> 'Views.homePage'
-routes :: Either String DBConn -> SessionServerPart Response
-routes conn = do
+routes :: SessionServerPart Response
+routes = do
+    conn <- liftIO getConn
     decodeBody myPolicy
     msum [
            dir  "css"                   Views.serveCSS

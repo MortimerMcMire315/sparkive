@@ -9,6 +9,8 @@ module View.Views
     , createDBButton
     ) where
 
+import Debug.Trace (trace)
+
 import Happstack.Server       ( notFound
                               , ok
                               , path
@@ -23,7 +25,8 @@ import Text.Hamlet               ( Html    )
 
 import Auth.Session      ( SessionServerPart       )
 import View.ContentTypes ( MIMEType(CSS, JS, HTML) )
-import View.Util         ( requireLogin
+import View.Util         ( provideContext
+                         , requireLogin
                          , nullDirServe
                          , tryQuery, withConn
                          , withConnErrBox
@@ -31,6 +34,7 @@ import View.Util         ( requireLogin
 import DB.Types          ( DBConn                  )
 
 import qualified DB.Query as Query
+import qualified View.RenderContext as RC
 import qualified View.Template as Template
 import qualified Auth.Login as Login
 
@@ -50,9 +54,10 @@ serveJS = lift . path $ \(jsRequest :: String) ->
 
 createDBButton :: SchrodingerConn -> SessionServerPart Response
 createDBButton eitherConn = do
-    results <- liftIO $ withConnErrBox eitherConn
-        (\conn -> tryQuery conn (Query.createDB "sparkive")
-                                (\_ -> demoQuery conn)
+    results <- withConnErrBox eitherConn
+        (\conn -> liftIO $
+                    tryQuery conn (Query.createDB "sparkive")
+                                  (\_ -> demoQuery conn)
         )
     ok $ toResponse results
 
@@ -60,12 +65,12 @@ demoQuery :: DBConn -> IO Html
 demoQuery conn = return $ Template.genericResultT [["something"]]
 
 homePage :: SchrodingerConn -> SessionServerPart Response
-homePage eitherConn = toDisplay >>= (ok . toResponse . Template.homePageT)
-    where toDisplay = liftIO $
-            withConnErrBox eitherConn
-                           (\conn ->
-                               tryQuery conn Query.checkDBExists
-                                   (\dbExists -> if   dbExists
+homePage sConn = homeContext >>= (ok . toResponse . Template.homePageT)
+    where homeContext =
+            withConn sConn (return . RC.errorRenderContext)
+                           (\conn -> provideContext conn $
+                                tryQuery conn Query.checkDBExists
+                                   (\dbExists -> if dbExists
                                                  then demoQuery conn
                                                  else return Template.createDBButtonT
                                    )

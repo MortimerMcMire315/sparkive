@@ -22,6 +22,7 @@ library
                      , View.TemplateUtil
                      , View.ContentTypes
                      , View.LoginView
+                     , View.RenderContext
                      , View.Views
                      , View.Util
                      , Auth.Login

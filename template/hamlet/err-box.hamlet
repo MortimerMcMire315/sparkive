@@ -1,4 +1,5 @@
-<div .err-box-container>
-    <div .err-box>
-        <div .err-box-text>
-            <p>^{errStr}
+$forall errStr <- errStrs
+    <div .err-box-container>
+        <div .err-box>
+            <div .err-box-text>
+                <p>^{errStr}

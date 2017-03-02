@@ -1,7 +1,7 @@
 <html>
     ^{headerT}
     <body>
-        ^{mainPageBannerT}
+        ^{mainPageBannerT rc}
         <div #content>
             ^{content}
     ^{footerT}

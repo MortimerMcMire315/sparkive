@@ -48,7 +48,7 @@ checkUserExists username = doQuery (PG.checkUserExists username)
                                    (AS.checkUserExistsQ username)
 
 -- Returns either an error string or maybe a username. If the token is not found,
--- returns (Right Nothing); if the token is found, returns (Left username)
+-- returns (Right Nothing); if the token is found, returns (Right username)
 verifySessToken :: ByteString -> DBConn -> IO (Either String (Maybe String))
 verifySessToken token = doQuery (PG.verifySessToken token)
                                 (AS.verifySessTokenQ token)

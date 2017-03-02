@@ -15,16 +15,7 @@ import View.TemplateUtil ( hamFile
                          , cssFile
                          , jsFile            )
 
-data UserInfo = LoggedOut | LoggedIn { username :: String } deriving Show
-
-data RenderContext = RenderContext { user     :: UserInfo
-                                   , errors   :: [String]
-                                   , warnings :: [String]
-                                   , msgs     :: [String]
-                                   } deriving Show
-
-emptyRenderContext :: RenderContext
-emptyRenderContext = RenderContext LoggedOut [] [] []
+import qualified View.RenderContext as RC
 
 -- |styles.css, the main stylesheet for the site.
 mainStyleSheet = renderCss $ $(luciusFile (cssFile "styles")) undefined
@@ -33,7 +24,7 @@ mainStyleSheet = renderCss $ $(luciusFile (cssFile "styles")) undefined
 createDBButtonJS = renderJavascriptUrl (\_ _ -> undefined) $(juliusFile (jsFile "create-db-button"))
 
 -- |The banner that runs across the top of the main page.
-mainPageBannerT = $(shamletFile $ hamFile "main-page-banner")
+mainPageBannerT rc = $(shamletFile $ hamFile "main-page-banner")
 
 -- |The <head> section to go on every page.
 headerT         = $(shamletFile $ hamFile "header")
@@ -41,28 +32,30 @@ headerT         = $(shamletFile $ hamFile "header")
 -- |Not really sure what this will be used for, actually.
 footerT         = $(shamletFile $ hamFile "footer")
 
--- |A red error box that can be displayed to the user if any exception occurs.
-errBoxT :: String -> Html
-errBoxT err = let errStr = preEscapedToHtml err in
+errBoxRawHtml :: String -> Html
+errBoxRawHtml = errBoxT . RC.errorRenderContext
+
+-- |Display red error boxes for each error in the provided render context
+errBoxT :: RC.RenderContext -> Html
+errBoxT rc = let errStrs = map preEscapedToHtml (RC.errors rc) in
                              $(shamletFile $ hamFile "err-box")
 
 -- |A <div> displaying generic query results.
 genericResultT :: [[String]] -> Html
 genericResultT results = $(shamletFile $ hamFile "generic-result")
 
-genericAdminPageT :: Html -> Html
-genericAdminPageT content = $(shamletFile $ hamFile "generic-admin-page")
+-- |A wrapper for every page.
+genericAdminPageT :: RC.RenderContext -> Html -> Html
+genericAdminPageT rc content = $(shamletFile $ hamFile "generic-admin-page")
 
 createDBButtonT :: Html
 createDBButtonT = $(shamletFile $ hamFile "create-db-button")
 
-loginPageT :: Html -> Html
-loginPageT err = genericAdminPageT $ $(shamletFile $ hamFile "login")
+loginPageT :: RC.RenderContext -> Html
+loginPageT rc = genericAdminPageT rc $ $(shamletFile $ hamFile "login")
 
-homePageT :: Html -> Html
---the Html argument just makes for convenient development, and
---should be removed as this project matures.
-homePageT toDisplay = genericAdminPageT $ $(shamletFile $ hamFile "home")
+homePageT :: RC.RenderContext -> Html
+homePageT rc = genericAdminPageT rc $ $(shamletFile $ hamFile "home")
 
-adminPanelT :: Html
-adminPanelT = genericAdminPageT $ $(shamletFile $ hamFile "admin-panel")
+adminPanelT :: RC.RenderContext -> Html
+adminPanelT rc = genericAdminPageT rc $ $(shamletFile $ hamFile "admin-panel")
