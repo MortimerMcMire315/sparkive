@@ -1,15 +1,15 @@
 module Server where
 
 import Happstack.Server               ( simpleHTTP
-                                      , nullConf       )
+                                      , nullConf      )
 import Happstack.Server.ClientSession ( getDefaultKey
                                       , sessionPath
                                       , withClientSessionT
-                                      , mkSessionConf  )
-import Routes                         ( routes         )
+                                      , mkSessionConf )
+import Routes                         ( entryPoint    )
 
 run :: IO ()
 run = do
     key <- getDefaultKey
     let sessionConf = mkSessionConf key
-    simpleHTTP nullConf $ withClientSessionT sessionConf routes
+    simpleHTTP nullConf $ withClientSessionT sessionConf entryPoint

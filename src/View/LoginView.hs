@@ -5,7 +5,7 @@ module View.LoginView ( adminPanel
                       ) where
 
 -- External modules
-import Control.Monad          ( msum, (>=>)   )
+import Control.Monad          ( msum          )
 import Control.Monad.IO.Class ( liftIO        )
 import Data.Maybe             ( fromMaybe     )
 import Data.ByteString        ( ByteString    )
@@ -24,13 +24,10 @@ import Happstack.Server       ( Method ( GET
 import Text.Blaze.Html        ( toHtml        )
 
 -- Local modules
-import View.Util    ( SchrodingerConn
-                    , getBaseContext
+import View.Util    ( getBaseContext
                     , isLoggedIn
                     , requireLogin
-                    , respondWithErr
-                    , withConn
-                    , withConnErrBox    )
+                    , respondWithErr    )
 import Auth.Session ( SessionServerPart
                     , getToken
                     , getUltDest
@@ -43,59 +40,48 @@ import Util.Random  ( getRandomToken    )
 import qualified View.Template as T
 import qualified View.RenderContext as RC
 
-adminPanel :: SchrodingerConn -> SessionServerPart Response
+adminPanel :: DBConn -> SessionServerPart Response
 -- Manually set the URI to /admin-panel in case the user requested /login. This
 -- ensures that the ult-dest is set to /admin-panel.
-adminPanel sConn = htmlResult >>= (requireLogin . ok . toResponse)
-    where htmlResult =
-            withConnErrBox sConn $ getBaseContext >=> (return . T.adminPanelT)
+adminPanel conn = htmlResult >>= (requireLogin conn . ok . toResponse)
+    where htmlResult = T.adminPanelT <$> getBaseContext conn
 
 -- |Routing for /login:
 --  GET: use the 'adminPanel' view because it requires a login, then serves the
 --  login page.
 --  POST: Validate credentials using loginPost
-login :: SchrodingerConn -> SessionServerPart Response
-login sConn = msum [ method [GET,HEAD] >> loginGet sConn
-                   , method POST       >> loginPost sConn
+login :: DBConn -> SessionServerPart Response
+login conn = msum [ method [GET,HEAD] >> loginGet conn
+                   , method POST       >> loginPost conn
                    ]
 
 -- |Check if the user is already logged in. If so, redirect to /admin-panel.
 --  If not, serve the login page.
-loginGet :: SchrodingerConn -> SessionServerPart Response
-loginGet sConn =
-    withConn
-      sConn
-      (respondWithErr T.loginPageT)
-      (\conn -> do
-        eLoggedIn <- isLoggedIn conn
-        case eLoggedIn of
-            Left e -> respondWithErr T.loginPageT e
-            Right loggedIn ->
-                if loggedIn
-                then seeOther "/admin-panel" (toResponse "Redirecting to /admin-panel...")
-                --TODO not empty context
-                else ok . toResponse $ T.loginPageT RC.emptyRenderContext
-      )
+loginGet :: DBConn -> SessionServerPart Response
+loginGet conn = do
+    eLoggedIn <- isLoggedIn conn
+    case eLoggedIn of
+        Left e -> respondWithErr T.loginPageT e
+        Right loggedIn ->
+            if loggedIn
+            then seeOther "/admin-panel" (toResponse "Redirecting to /admin-panel...")
+            --TODO not empty context
+            else ok . toResponse $ T.loginPageT RC.emptyRenderContext
 
-
-loginPost :: SchrodingerConn -> SessionServerPart Response
-loginPost sConn = withConn sConn
-    --If connection fails, respond with error
-    (respondWithErr T.loginPageT)
-    (\conn -> do
-        uname <- look "username"
-        pass <- look "password"
-        --Attempt to log in to the database
-        loginResults <- liftIO $ doLogin uname pass conn
-        case loginResults of
-            --If the login failed, serve the login page with the error displayed.
-            Left err -> respondWithErr T.loginPageT err
-            --Login success.
-            Right sessToken -> do
-                --Store the session token in the user's cookie and in the database
-                storeResult <- putToken uname sessToken conn
-                serveLoginResponse uname storeResult conn
-    )
+loginPost :: DBConn -> SessionServerPart Response
+loginPost conn = do
+    uname <- look "username"
+    pass <- look "password"
+    --Attempt to log in to the database
+    loginResults <- liftIO $ doLogin uname pass conn
+    case loginResults of
+        --If the login failed, serve the login page with the error displayed.
+        Left err -> respondWithErr T.loginPageT err
+        --Login success.
+        Right sessToken -> do
+            --Store the session token in the user's cookie and in the database
+            storeResult <- putToken uname sessToken conn
+            serveLoginResponse uname storeResult conn
 
 doLogin :: String -> String -> DBConn ->  IO (Either String ByteString)
 doLogin uname pass conn = do

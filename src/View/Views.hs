@@ -15,11 +15,8 @@ import Happstack.Server       ( notFound
                               , ok
                               , path
                               , toResponse
-                              , ServerPart
-                              , ServerPartT
                               , Response )
 
-import Control.Monad.IO.Class    ( liftIO  )
 import Control.Monad.Trans.Class ( lift    )
 import Text.Hamlet               ( Html    )
 
@@ -28,9 +25,7 @@ import View.ContentTypes ( MIMEType(CSS, JS, HTML) )
 import View.Util         ( provideContext
                          , requireLogin
                          , nullDirServe
-                         , tryQuery, withConn
-                         , withConnErrBox
-                         , SchrodingerConn         )
+                         , tryQuery                )
 import DB.Types          ( DBConn                  )
 
 import qualified DB.Query as Query
@@ -52,26 +47,21 @@ serveJS = lift . path $ \(jsRequest :: String) ->
                 "create-db-button.js" -> nullDirServe Template.createDBButtonJS JS
                 _            -> notFound $ toResponse ("JavaScript file not fouund." :: String)
 
-createDBButton :: SchrodingerConn -> SessionServerPart Response
-createDBButton eitherConn = do
-    results <- withConnErrBox eitherConn
-        (\conn -> liftIO $
-                    tryQuery conn (Query.createDB "sparkive")
-                                  (\_ -> demoQuery conn)
-        )
+createDBButton :: DBConn -> SessionServerPart Response
+createDBButton conn = do
+    results <- tryQuery conn (Query.createDB "sparkive")
+                             (\_ -> demoQuery conn)
     ok $ toResponse results
 
-demoQuery :: DBConn -> IO Html
+demoQuery :: DBConn -> SessionServerPart Html
 demoQuery conn = return $ Template.genericResultT [["something"]]
 
-homePage :: SchrodingerConn -> SessionServerPart Response
-homePage sConn = homeContext >>= (ok . toResponse . Template.homePageT)
+homePage :: DBConn -> SessionServerPart Response
+homePage conn = homeContext >>= (ok . toResponse . Template.homePageT)
     where homeContext =
-            withConn sConn (return . RC.errorRenderContext)
-                           (\conn -> provideContext conn $
-                                tryQuery conn Query.checkDBExists
-                                   (\dbExists -> if dbExists
-                                                 then demoQuery conn
-                                                 else return Template.createDBButtonT
-                                   )
-                           )
+              provideContext conn $
+                  tryQuery conn Query.checkDBExists
+                     (\dbExists -> if dbExists
+                                   then demoQuery conn
+                                   else return Template.createDBButtonT
+                     )

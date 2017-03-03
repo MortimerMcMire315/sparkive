@@ -5,11 +5,9 @@ module View.Util ( getBaseContext
                  , requireLogin
                  , respondWithErr
                  , tryQuery
-                 , withConn
-                 , withConnErrBox
-                 , SchrodingerConn ) where
+                 , DBConn ) where
 
-import Control.Monad.IO.Class ( liftIO )
+import Control.Monad.IO.Class ( liftIO, MonadIO )
 import Happstack.Server       ( ok
                               , toResponse
                               , nullDir
@@ -32,44 +30,33 @@ import Auth.Session      ( getToken
 import qualified View.RenderContext as RC
 import qualified View.Template as T
 
--- |A database connection in a quantum state of uncertainty. It doesn't matter
---  whether or not it's a valid connection until we look inside.
-type SchrodingerConn = Either String DBConn
-
 -- |Make sure the request is sane (no path segments after *.css or *.js or
 --  whatever); if so, serve the file with MIME type "text/css"
 nullDirServe :: (ToMessage t) => t -> MIMEType -> ServerPart Response
 nullDirServe template mimeT = nullDir >> ok (toResMime template mimeT)
 
-withConn :: (Monad m) => SchrodingerConn -> (String -> m a) -> (DBConn -> m a) -> m a
-withConn eitherConn failAction successAction =
-    case eitherConn of
-        Left err -> failAction err
-        Right conn -> successAction conn
-
-withConnErrBox :: SchrodingerConn -> (DBConn -> SessionServerPart Html) -> SessionServerPart Html
-withConnErrBox eitherConn = withConn eitherConn (return . T.errBoxRawHtml)
-
 -- |Attempt to run a SQL query given a 'DBConn', a query function from 'Query',
 -- and a function to run on success. The success function uses the results of
 -- the query to construct an HTML fragment. On failure, uses 'T.errBoxT'
 -- to display an error on the frontend.
-tryQuery :: DBConn -> (DBConn -> IO (Either String a)) -> (a -> IO Html) -> IO Html
+tryQuery :: (MonadIO m) => DBConn -> (DBConn -> IO (Either String a)) -> (a -> m Html) -> m Html
 tryQuery conn queryF successAction = do
-    eitherErrResults <- queryF conn
+    eitherErrResults <- liftIO $ queryF conn
     case eitherErrResults of
         Left err        -> return $ T.errBoxRawHtml err
         Right results   -> successAction results
 
-requireLogin :: SessionServerPart Response -> SessionServerPart Response
-requireLogin action = do
-    maybeToken   <- getToken
+requireLogin :: DBConn -> SessionServerPart Response -> SessionServerPart Response
+requireLogin conn action = do
     rqData       <- askRq
     let needLogin = "You must be logged in to access this page."
-    case maybeToken of
-        Nothing    -> putUltDest (Just $ rqUri rqData) >> (ok . toResponse . T.loginPageT $ RC.errorRenderContext needLogin)
-        --TODO actually check the token
-        Just token -> action
+    loggedInResult <- isLoggedIn conn
+    case loggedInResult of
+            Left  err      -> respondWithErr T.loginPageT err
+            Right loggedIn -> if loggedIn
+                              then action
+                              else do putUltDest . Just $ rqUri rqData
+                                      respondWithErr T.loginPageT needLogin
 
 getUserInfo :: DBConn -> SessionServerPart (Either String RC.UserInfo)
 getUserInfo conn = do
@@ -109,9 +96,9 @@ getBaseContext conn = do
         Left e -> return $ RC.errorRenderContext e
         Right uInfo -> return $ RC.emptyRenderContext {RC.user=uInfo}
 
-provideContext :: DBConn -> IO Html -> SessionServerPart RC.RenderContext
+provideContext :: DBConn -> SessionServerPart Html -> SessionServerPart RC.RenderContext
 provideContext conn html = do
-    htmlResult <- liftIO html
+    htmlResult <- html
     baseContext <- getBaseContext conn
     return $ RC.contentOrErrors baseContext htmlResult
 
