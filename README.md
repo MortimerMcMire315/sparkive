@@ -44,6 +44,12 @@ Goals
   may easily switch between the two
 * Users can modify CSS/HTML and make their own templates
 
+Install & Run
+-------------
+* Install [stack](https://docs.haskellstack.org/en/stable/README/)
+* In the `conf` directory, edit `sparkive_example.conf` and move to `sparkive.conf`.
+* run `stack build`
+
 License
 -------
 
