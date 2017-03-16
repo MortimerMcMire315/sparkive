@@ -1,1 +1,1 @@
-<p>Admin Page
+<p>Welcome, <b>#{RC.username $ RC.user rc}</b>!
