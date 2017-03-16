@@ -46,11 +46,9 @@ checkDBExists conn = do
 tryQuery :: (a -> b) -> IO a -> IO (Either String b)
 tryQuery f q = catches (fmap (Right . f) q) $ E.handleErrorCall : E.sqlErrorHandlers
 
--- |Parse the "db/create.sql" file, and use it to create the necessary tables
---  for a Sparkive installation.
-createDB :: String -> Connection -> IO (Either String ())
-createDB user conn = do
-    let filepath = "db/create.sql"
+-- |Given a file path to a SQL script, dump into the Postgres database. Warning: Scary!
+inputSQLFromFile :: FilePath -> String -> Connection -> IO (Either String ())
+inputSQLFromFile filepath user conn = do
     let fileErrStr = "Could not open file \"" ++ filepath ++
                     "\". Please check that the file exists and is readable in\
                     \ your Sparkive installation."
@@ -65,6 +63,14 @@ createDB user conn = do
         Right fileStr -> do
             let (q :: Query) = read . show $ replace "%user%" user fileStr
             tryQuery rawResults $ execute_ conn q
+
+-- |Parse the "db/create.sql" file, and use it to create the necessary tables
+--  for a Sparkive installation.
+createDB :: String -> Connection -> IO (Either String ())
+createDB username conn = do
+    create <- inputSQLFromFile "db/create.sql" username conn
+    populate <- inputSQLFromFile "db/populate.sql" username conn
+    return $ create >> populate
 
 --TODO!!! Check if user already exists. Or did we do this elsewhere? Where should I put it????
 insertUser :: String -> ByteString -> ByteString -> Connection -> IO (Either String ())

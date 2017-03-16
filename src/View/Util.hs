@@ -7,6 +7,8 @@ module View.Util ( getBaseContext
                  , tryQuery
                  , DBConn ) where
 
+import Debug.Trace (trace)
+
 import Control.Monad.IO.Class ( liftIO, MonadIO )
 import Happstack.Server       ( ok
                               , toResponse

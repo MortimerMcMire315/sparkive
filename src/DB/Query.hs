@@ -50,8 +50,17 @@ checkUserExists username = doQuery (PG.checkUserExists username)
 -- Returns either an error string or maybe a username. If the token is not found,
 -- returns (Right Nothing); if the token is found, returns (Right username)
 verifySessToken :: ByteString -> DBConn -> IO (Either String (Maybe String))
-verifySessToken token = doQuery (PG.verifySessToken token)
-                                (AS.verifySessTokenQ token)
+verifySessToken token conn = do
+    --If the DB schema does not exist, this isn't necessarily a problem, but no
+    --token is found.
+    dbExists <- checkDBExists conn
+    case dbExists of
+        Left err -> return $ Left err
+        Right exists -> if exists
+                        then doQuery (PG.verifySessToken token)
+                                     (AS.verifySessTokenQ token)
+                                     conn
+                        else return $ Right Nothing
 
 insertSessToken :: String -> ByteString -> DBConn -> IO (Either String ())
 insertSessToken username token = doQuery (PG.insertSessToken username token)

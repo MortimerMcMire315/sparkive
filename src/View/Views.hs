@@ -9,6 +9,8 @@ module View.Views
     , createDBButton
     ) where
 
+import Debug.Trace (trace)
+
 import Happstack.Server       ( notFound
                               , ok
                               , path
