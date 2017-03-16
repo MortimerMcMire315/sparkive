@@ -9,16 +9,14 @@ module View.Views
     , createDBButton
     ) where
 
-import Debug.Trace (trace)
-
 import Happstack.Server       ( notFound
                               , ok
                               , path
                               , toResponse
                               , Response )
+import Text.Hamlet ( Html )
 
 import Control.Monad.Trans.Class ( lift    )
-import Text.Hamlet               ( Html    )
 
 import Auth.Session      ( SessionServerPart       )
 import View.ContentTypes ( MIMEType(CSS, JS, HTML) )
